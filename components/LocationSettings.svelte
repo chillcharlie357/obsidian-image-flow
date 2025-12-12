@@ -21,17 +21,60 @@
       .replace(/\{file_path\}/g, ctx?.file_path || '')
       .replace(/\{vault\}\//g, '')
   }
+
+  const OPTIONS = [
+    { value: 'vault_assets', label: 'Vault Assets', desc: 'Save to vault/assets/' },
+    { value: 'filename_assets', label: 'Current File Assets', desc: 'Save to {filename}.assets/' },
+    { value: 'filepath_assets', label: 'Current Folder Assets', desc: 'Save to {file_path}/assets/' },
+    { value: 'custom', label: 'Custom', desc: 'Define your own path pattern' },
+  ]
 </script>
 
-<div>
-  <label><input type="radio" name="loc" value="vault_assets" bind:group={local.saveLocationMode}>Save to vault/assets/</label>
-  <label><input type="radio" name="loc" value="filename_assets" bind:group={local.saveLocationMode}>Save to {`{filename}.assets/`}</label>
-  <label><input type="radio" name="loc" value="filepath_assets" bind:group={local.saveLocationMode}>Save to {`{file_path}/assets/`}</label>
-  <label><input type="radio" name="loc" value="custom" bind:group={local.saveLocationMode}>Custom directory</label>
-  {#if local.saveLocationMode === 'custom'}
-    <div>
-      <input placeholder={"{vault}/assets/{date}/"} bind:value={local.customLocationPattern}>
-    </div>
-  {/if}
-  <div>Example: {preview()}</div>
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Location Mode</div>
+    <div class="setting-item-description">Choose where to save the images</div>
+  </div>
+  <div class="setting-item-control">
+    <select bind:value={local.saveLocationMode} class="dropdown">
+      {#each OPTIONS as opt}
+        <option value={opt.value}>{opt.label}</option>
+      {/each}
+    </select>
+  </div>
 </div>
+
+{#if local.saveLocationMode === 'custom'}
+  <div class="setting-item">
+    <div class="setting-item-info">
+      <div class="setting-item-name">Custom Path Pattern</div>
+      <div class="setting-item-description">
+        Available: {`{vault}, {date}, {filename}, {file_path}`}
+      </div>
+    </div>
+    <div class="setting-item-control">
+      <input type="text" bind:value={local.customLocationPattern} placeholder="{`{vault}/assets/{date}/`}">
+    </div>
+  </div>
+{/if}
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Preview Path</div>
+    <div class="setting-item-description">The image will be saved to:</div>
+  </div>
+  <div class="setting-item-control">
+    <span class="preview-text">{preview()}</span>
+  </div>
+</div>
+
+<style>
+  .preview-text {
+    font-family: var(--font-monospace);
+    color: var(--text-accent);
+    background-color: var(--background-secondary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+</style>

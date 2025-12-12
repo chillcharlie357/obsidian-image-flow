@@ -4,6 +4,7 @@
   let { value, onChange }: Props = $props()
   let local = $state({ ...value })
   $effect(() => { onChange(local) })
+
   function sampleName() {
     return generateName('image.png', local)
   }
@@ -25,10 +26,36 @@
   }
 </script>
 
-<div>
-  <label><input type="checkbox" bind:checked={local.keepOriginal}>Keep original filename</label>
-  <div>
-    <input placeholder={"{date}-{time}-{random}"} bind:value={local.renamePattern} disabled={local.keepOriginal}>
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Keep original filename</div>
+    <div class="setting-item-description">Use the original filename instead of generating a new one</div>
   </div>
-  <div>Example: {sampleName()}</div>
+  <div class="setting-item-control">
+    <div class="checkbox-container {local.keepOriginal ? 'is-enabled' : ''}" onclick={() => local.keepOriginal = !local.keepOriginal}>
+      <input type="checkbox" bind:checked={local.keepOriginal}>
+    </div>
+  </div>
 </div>
+
+<div class="setting-item">
+  <div class="setting-item-info">
+    <div class="setting-item-name">Rename Pattern</div>
+    <div class="setting-item-description">
+      Available: {`{date}, {time}, {random}, {filename}`}
+      <div class="setting-item-description-sub">Preview: {sampleName()}</div>
+    </div>
+  </div>
+  <div class="setting-item-control">
+    <input type="text" bind:value={local.renamePattern} disabled={local.keepOriginal} placeholder="{`{date}-{time}-{random}`}">
+  </div>
+</div>
+
+<style>
+  .setting-item-description-sub {
+    margin-top: 4px;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    font-family: var(--font-monospace);
+  }
+</style>
