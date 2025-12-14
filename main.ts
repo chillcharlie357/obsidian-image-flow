@@ -20,6 +20,9 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     saveLocationMode: 'vault_assets',
     customLocationPattern: '{vault}/assets/{date}/',
     imageSyntaxMode: 'wikilink',
+    uploadEnabled: false,
+    uploaderType: 'none',
+    uploaderCommandPath: '',
 }
 
 	export default class MyPlugin extends Plugin {

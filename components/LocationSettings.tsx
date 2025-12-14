@@ -12,6 +12,7 @@ export default function LocationSettings(props: {
   value: LocationSettingsValue
   ctx?: NoteContext
   onChange: (v: LocationSettingsValue) => void
+  disabled?: boolean
 }) {
   const [local, setLocal] = useState<LocationSettingsValue>({ ...props.value })
   useEffect(() => props.onChange(local), [local])
@@ -24,13 +25,13 @@ export default function LocationSettings(props: {
       local.saveLocationMode === 'vault_assets'
         ? 'assets/'
         : local.saveLocationMode === 'filename_assets'
-        ? `${props.ctx?.filename || 'note'}.assets/`
+        ? `${props.ctx?.filename || '{filename}'}.assets/`
         : local.saveLocationMode === 'filepath_assets'
         ? `${props.ctx?.file_path || ''}/assets/`
         : local.customLocationPattern
     return normalizeDir(base)
       .replace(/\{date\}/g, date)
-      .replace(/\{filename\}/g, props.ctx?.filename || 'note')
+      .replace(/\{filename\}/g, props.ctx?.filename || '{filename}')
       .replace(/\{file_path\}/g, props.ctx?.file_path || '')
       .replace(/\{vault\}\//g, '')
   }
@@ -51,6 +52,7 @@ export default function LocationSettings(props: {
           <select
             className="dropdown"
             value={local.saveLocationMode}
+            disabled={props.disabled}
             onChange={(e) => setLocal({ ...local, saveLocationMode: e.target.value as SaveLocationMode })}
           >
             {OPTIONS.map((opt) => (
@@ -74,6 +76,7 @@ export default function LocationSettings(props: {
             <input
               type="text"
               value={local.customLocationPattern}
+              disabled={props.disabled}
               onChange={(e) => setLocal({ ...local, customLocationPattern: e.target.value })}
               placeholder={'{vault}/assets/{date}/'}
             />

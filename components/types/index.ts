@@ -1,5 +1,6 @@
 export type SaveLocationMode = 'vault_assets' | 'filename_assets' | 'filepath_assets' | 'custom'
 export type ImageSyntaxMode = 'markdown' | 'wikilink'
+export type ImageUploaderType = 'none' | 'picgo' | 'picgo_core' | 'piclist'
 
 export interface ImageFlowSettingsCore {
   renameEnabled: boolean
@@ -8,6 +9,9 @@ export interface ImageFlowSettingsCore {
   saveLocationMode: SaveLocationMode
   customLocationPattern: string
   imageSyntaxMode: ImageSyntaxMode
+  uploadEnabled: boolean
+  uploaderType: ImageUploaderType
+  uploaderCommandPath: string
 }
 
 export interface RenameSettingsValue {

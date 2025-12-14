@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ImageFlowSettingsCore, NoteContext } from './types'
 import RenameSettings from './RenameSettings'
 import LocationSettings from './LocationSettings'
+import ImageUploadSettings from './ImageUploadSettings'
 
 export default function ImageFlowSettings(props: {
   settings: ImageFlowSettingsCore
@@ -76,15 +77,41 @@ export default function ImageFlowSettings(props: {
         </div>
       </div>
 
-      <div className="setting-item-heading">
-        <div className="setting-item-name">Save Location</div>
-      </div>
-
-      <LocationSettings
-        value={{ saveLocationMode: local.saveLocationMode, customLocationPattern: local.customLocationPattern }}
-        ctx={props.ctx}
-        onChange={(v) => setLocal({ ...local, saveLocationMode: v.saveLocationMode, customLocationPattern: v.customLocationPattern })}
+      <ImageUploadSettings
+        value={{
+          uploadEnabled: local.uploadEnabled,
+          uploaderType: local.uploaderType,
+          uploaderCommandPath: local.uploaderCommandPath,
+        }}
+        onChange={(v) =>
+          setLocal({
+            ...local,
+            uploadEnabled: v.uploadEnabled,
+            uploaderType: v.uploaderType,
+            uploaderCommandPath: v.uploaderCommandPath,
+          })
+        }
       />
+
+      {!local.uploadEnabled && (
+        <>
+          <div className="setting-item-heading">
+            <div className="setting-item-name">Save Location</div>
+          </div>
+
+          <LocationSettings
+            value={{ saveLocationMode: local.saveLocationMode, customLocationPattern: local.customLocationPattern }}
+            ctx={props.ctx}
+            onChange={(v) =>
+              setLocal({
+                ...local,
+                saveLocationMode: v.saveLocationMode,
+                customLocationPattern: v.customLocationPattern,
+              })
+            }
+          />
+        </>
+      )}
     </div>
   )
 }

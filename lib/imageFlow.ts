@@ -1,4 +1,4 @@
-import { App, TFile, Notice, Editor, MarkdownView } from 'obsidian'
+import { App, TFile, Notice, Editor, MarkdownView, FileSystemAdapter } from 'obsidian'
 import type { MyPluginSettings } from './types'
 
 const LOG_PREFIX = '[Image Flow]'
@@ -72,6 +72,11 @@ function pathJoin(a: string, b: string) {
   if (!a) return b
   if (a.endsWith('/')) return `${a}${b}`
   return `${a}/${b}`
+}
+
+function httpInText(s: string) {
+  const m = s.match(/https?:\/\/\S+/g)
+  return m ? m[m.length - 1] : ''
 }
 
 function relativePath(from: string, to: string) {
@@ -178,6 +183,89 @@ export async function uniquePath(app: App, dir: string, base: string, ext: strin
   return candidate
 }
 
+function getAbsolutePath(app: App, vaultPath: string) {
+  const adapter = app.vault.adapter
+  if (adapter instanceof FileSystemAdapter) {
+    const base = adapter.getBasePath()
+    const path = require('path')
+    return path.join(base, vaultPath)
+  }
+  return vaultPath
+}
+
+// 通过命令行工具上传图片，优先从标准输出解析 URL，若无则尝试从剪贴板读取链接
+async function uploadThroughCLI(settings: MyPluginSettings, absPath: string) {
+  try {
+    const cp = require('child_process')
+    const type = settings.uploaderType
+    let cmd = (settings as any).uploaderCommandPath as string | undefined
+    cmd = cmd && cmd.trim().length > 0 ? cmd.trim() : undefined
+    let args: string[] = []
+    if (type === 'piclist') {
+      cmd = cmd || 'piclist'
+      args = ['upload', absPath]
+    } else {
+      cmd = cmd || 'picgo'
+      args = ['upload', absPath]
+    }
+    log('upload exec', { cmd, args })
+    // 执行外部上传命令，收集 stdout / stderr 作为原始输出
+    const out: string = await new Promise((resolve, reject) => {
+      const p = cp.spawn(cmd, args, { shell: true })
+      let stdout = ''
+      let stderr = ''
+      p.stdout.on('data', (d: Buffer) => (stdout += d.toString()))
+      p.stderr.on('data', (d: Buffer) => (stderr += d.toString()))
+      p.on('error', reject)
+      p.on('close', (code: number) => {
+        if (code === 0) resolve(stdout || stderr)
+        else reject(new Error(stderr || `exit ${code}`))
+      })
+    })
+    let combined = out || ''
+    let url = httpInText(combined)
+    if (!url) {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+      const electron = (() => {
+        try {
+          // Obsidian 桌面端基于 Electron，这里优先使用 electron.clipboard 读取剪贴板
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          return require('electron')
+        } catch {
+          return null
+        }
+      })()
+      for (let i = 0; i < 5 && !url; i++) {
+        try {
+          let clipText = ''
+          if (electron && electron.clipboard && typeof electron.clipboard.readText === 'function') {
+            clipText = electron.clipboard.readText() || ''
+          } else {
+            const w: any = window as any
+            const nav = w && w.navigator
+            if (nav && nav.clipboard && typeof nav.clipboard.readText === 'function') {
+              clipText = await nav.clipboard.readText()
+            }
+          }
+          if (clipText) {
+            log('upload clipboard text', clipText)
+            combined = `${combined}\n${clipText}`
+            url = httpInText(combined)
+          }
+        } catch (e) {
+          logWarn('upload read clipboard failed', e)
+        }
+        if (!url) await sleep(200)
+      }
+    }
+    log('upload done', { url, raw: combined })
+    return url || ''
+  } catch (e) {
+    logError('upload failed', e)
+    return ''
+  }
+}
+
 // 执行真正的重命名移动操作
 export async function moveRename(app: App, file: TFile, to: string) {
   let target = normalizeDir(to)
@@ -245,8 +333,13 @@ export async function handlePaste(
       const newFile = await app.vault.createBinary(dest, buffer)
 
       const link = app.fileManager.generateMarkdownLink(newFile, activeFile?.path ?? '')
+      let remoteUrl = ''
+      if ((settings as any).uploadEnabled && (settings as any).uploaderType && (settings as any).uploaderType !== 'none') {
+        const absPath = getAbsolutePath(app, newFile.path)
+        remoteUrl = await uploadThroughCLI(settings, absPath)
+      }
       let imageSyntax: string
-      if (settings.imageSyntaxMode === 'markdown') {
+      if (settings.imageSyntaxMode === 'markdown' || remoteUrl) {
         const notePath = activeFile?.path || ''
         const rel = relativePath(notePath, newFile.path)
         /***
@@ -258,7 +351,7 @@ export async function handlePaste(
         if (/^\d+$/.test(alt)) {
           alt = `${alt}.${ext || newFile.extension || 'image'}`
         }
-        imageSyntax = `![${alt}](${rel})`
+        imageSyntax = `![${alt}](${remoteUrl || rel})`
       } else {
         imageSyntax = link.startsWith('!') ? link : `!${link}`
       }
@@ -268,6 +361,7 @@ export async function handlePaste(
         imageSyntax,
         filePath: newFile.path,
         notePath: activeFile?.path,
+        remoteUrl,
       })
       editor.replaceSelection(imageSyntax)
     }
