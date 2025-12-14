@@ -1,4 +1,5 @@
 export type SaveLocationMode = 'vault_assets' | 'filename_assets' | 'filepath_assets' | 'custom'
+export type ImageSyntaxMode = 'markdown' | 'wikilink'
 
 export interface ImageFlowSettingsCore {
   renameEnabled: boolean
@@ -6,6 +7,7 @@ export interface ImageFlowSettingsCore {
   renamePattern: string
   saveLocationMode: SaveLocationMode
   customLocationPattern: string
+  imageSyntaxMode: ImageSyntaxMode
 }
 
 export interface RenameSettingsValue {
@@ -22,4 +24,3 @@ export interface NoteContext {
   filename?: string
   file_path?: string
 }
-

@@ -52,6 +52,31 @@ export default function ImageFlowSettings(props: {
       )}
 
       <div className="setting-item-heading">
+        <div className="setting-item-name">Image Syntax</div>
+      </div>
+
+      <div className="setting-item">
+        <div className="setting-item-info">
+          <div className="setting-item-name">Image link format</div>
+          <div className="setting-item-description">Choose between Markdown syntax and Obsidian wikilink syntax</div>
+        </div>
+        <div className="setting-item-control">
+          <select
+            value={local.imageSyntaxMode}
+            onChange={(e) =>
+              setLocal({
+                ...local,
+                imageSyntaxMode: e.target.value as any,
+              })
+            }
+          >
+            <option value="markdown">Markdown: ![alt](path/to/image.png)</option>
+            <option value="wikilink">Wikilink: ![[image.png]]</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="setting-item-heading">
         <div className="setting-item-name">Save Location</div>
       </div>
 
@@ -63,4 +88,3 @@ export default function ImageFlowSettings(props: {
     </div>
   )
 }
-

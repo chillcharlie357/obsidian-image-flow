@@ -44,6 +44,20 @@ function pathJoin(a: string, b: string) {
   return `${a}/${b}`
 }
 
+function relativePath(from: string, to: string) {
+  if (!from) return to
+  const fromParts = from.split('/').slice(0, -1)
+  const toParts = to.split('/')
+  let i = 0
+  while (i < fromParts.length && i < toParts.length && fromParts[i] === toParts[i]) i++
+  const up = new Array(fromParts.length - i).fill('..')
+  const down = toParts.slice(i)
+  const parts = up.concat(down)
+  let rel = parts.join('/')
+  if (!rel.startsWith('../')) rel = `./${rel}`
+  return rel
+}
+
 // 规范化目录：去掉重复 /、首尾 /
 export function normalizeDir(dir: string) {
   if (!dir) return ''
@@ -167,8 +181,15 @@ export async function handlePaste(app: App, settings: MyPluginSettings, evt: Cli
         const newFile = await app.vault.createBinary(dest, buffer);
 
         const link = app.fileManager.generateMarkdownLink(newFile, markdownView.file?.path ?? '');
-        const imageSyntax = link.startsWith('!') ? link : `!${link}`;
+        let imageSyntax: string
+        if (settings.imageSyntaxMode === 'markdown') {
+          const notePath = markdownView.file?.path || activeFile?.path || ''
+          const rel = relativePath(notePath, newFile.path)
+          const alt = newFile.basename
+          imageSyntax = `![${alt}](${rel})`
+        } else {
+          imageSyntax = link.startsWith('!') ? link : `!${link}`
+        }
         editor.replaceSelection(imageSyntax);
     }
 }
-

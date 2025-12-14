@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     renamePattern: '{date}-{time}-{random}',
     saveLocationMode: 'vault_assets',
     customLocationPattern: '{vault}/assets/{date}/',
+    imageSyntaxMode: 'wikilink',
 }
 
 	export default class MyPlugin extends Plugin {
