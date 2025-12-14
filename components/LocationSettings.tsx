@@ -1,0 +1,95 @@
+import { useEffect, useMemo, useState } from 'react'
+import type { LocationSettingsValue, NoteContext, SaveLocationMode } from './types'
+
+const OPTIONS: { value: SaveLocationMode; label: string; desc: string }[] = [
+  { value: 'vault_assets', label: 'Vault Assets', desc: 'Save to vault/assets/' },
+  { value: 'filename_assets', label: 'Current File Assets', desc: 'Save to {filename}.assets/' },
+  { value: 'filepath_assets', label: 'Current Folder Assets', desc: 'Save to {file_path}/assets/' },
+  { value: 'custom', label: 'Custom', desc: 'Define your own path pattern' },
+]
+
+export default function LocationSettings(props: {
+  value: LocationSettingsValue
+  ctx?: NoteContext
+  onChange: (v: LocationSettingsValue) => void
+}) {
+  const [local, setLocal] = useState<LocationSettingsValue>({ ...props.value })
+  useEffect(() => props.onChange(local), [local])
+
+  function preview() {
+    const now = new Date()
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+    const base =
+      local.saveLocationMode === 'vault_assets'
+        ? 'assets/'
+        : local.saveLocationMode === 'filename_assets'
+        ? `${props.ctx?.filename || 'note'}.assets/`
+        : local.saveLocationMode === 'filepath_assets'
+        ? `${props.ctx?.file_path || ''}/assets/`
+        : local.customLocationPattern
+    return normalizeDir(base)
+      .replace(/\{date\}/g, date)
+      .replace(/\{filename\}/g, props.ctx?.filename || 'note')
+      .replace(/\{file_path\}/g, props.ctx?.file_path || '')
+      .replace(/\{vault\}\//g, '')
+  }
+
+  function normalizeDir(dir: string) {
+    if (!dir) return ''
+    return dir.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+  }
+
+  return (
+    <>
+      <div className="setting-item">
+        <div className="setting-item-info">
+          <div className="setting-item-name">Location Mode</div>
+          <div className="setting-item-description">Choose where to save the images</div>
+        </div>
+        <div className="setting-item-control">
+          <select
+            className="dropdown"
+            value={local.saveLocationMode}
+            onChange={(e) => setLocal({ ...local, saveLocationMode: e.target.value as SaveLocationMode })}
+          >
+            {OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {local.saveLocationMode === 'custom' && (
+        <div className="setting-item">
+          <div className="setting-item-info">
+            <div className="setting-item-name">Custom Path Pattern</div>
+            <div className="setting-item-description">
+              Available: {'{vault}, {date}, {filename}, {file_path}'}
+            </div>
+          </div>
+          <div className="setting-item-control">
+            <input
+              type="text"
+              value={local.customLocationPattern}
+              onChange={(e) => setLocal({ ...local, customLocationPattern: e.target.value })}
+              placeholder={'{vault}/assets/{date}/'}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="setting-item">
+        <div className="setting-item-info">
+          <div className="setting-item-name">Preview Path</div>
+          <div className="setting-item-description">The image will be saved to:</div>
+        </div>
+        <div className="setting-item-control">
+          <span className="preview-text">{preview()}</span>
+        </div>
+      </div>
+    </>
+  )
+}

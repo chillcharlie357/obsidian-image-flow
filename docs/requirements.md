@@ -8,11 +8,11 @@
 
 ## 图片位置
 
--   如果不上传图片，可按规则保存到指定目录
-    -   `{vault}/assets/`
-    -   `{filename}.assets/`
-    -   `{file_path}/assets/`
-    -   自定义目录，如`{vault}/assets/{date}/`
+-   如果不上传图片，可按规则保存到指定目录（路径均相对 vault 根目录）
+    -   Vault assets：始终保存到 `assets/`
+    -   File assets：保存到 `{file_path?}/{filename}.assets/`
+    -   Current folder assets：保存到 `{file_path?}/assets/`（当前文件夹的 `./assets/`）
+    -   自定义目录：支持占位符（`{vault}`、`{date}`、`{filename}`、`{file_path}`），例如 `{vault}/assets/{date}/`
 
 ## 图片上传
 
