@@ -2,7 +2,7 @@ import { App, Editor, MarkdownView, Notice } from 'obsidian'
 import type { ImageFlowPluginSettings } from './types'
 import { tokens, getTargetDir, getTargetBase, splitName } from './naming'
 import { ensureFolder, uniquePath, getAbsolutePath, relativePath } from './paths'
-import { resolveUploaderStrategy } from './upload'
+import { UploadContext } from './upload'
 import { log, logError, logWarn } from './log'
 
 export async function handlePaste(
@@ -51,10 +51,8 @@ export async function handlePaste(
       let remoteUrl = ''
       if ((settings as any).uploadEnabled && (settings as any).uploaderType && (settings as any).uploaderType !== 'none') {
         const absPath = getAbsolutePath(app, newFile.path)
-        const strategy = resolveUploaderStrategy((settings as any).uploaderType)
-        if (strategy) {
-          remoteUrl = await strategy.upload(settings, absPath)
-        }
+        const ctx = new UploadContext(settings, (settings as any).uploaderType)
+        remoteUrl = await ctx.upload(absPath)
         if (remoteUrl && (settings as any).deleteLocalAfterUpload) {
           try {
             await app.vault.delete(newFile)

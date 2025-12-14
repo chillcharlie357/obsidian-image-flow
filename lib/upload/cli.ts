@@ -1,56 +1,14 @@
-import type { ImageFlowPluginSettings } from './types'
-import { log, logWarn, logError } from './log'
+import { log, logWarn, logError } from '../log'
+import type { UploadRequest } from './types'
 
 function httpInText(s: string) {
   const m = s.match(/https?:\/\/\S+/g)
   return m ? m[m.length - 1] : ''
 }
 
-export interface ImageUploaderStrategy {
-  type: string
-  upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string>
-}
-
-class PicListUploader implements ImageUploaderStrategy {
-  type = 'piclist'
-
-  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
-    return uploadViaCliAndClipboard(settings, absPath, 'piclist')
-  }
-}
-
-class PicGoUploader implements ImageUploaderStrategy {
-  type = 'picgo'
-
-  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
-    return uploadViaCliAndClipboard(settings, absPath, 'picgo')
-  }
-}
-
-class PicGoCoreUploader implements ImageUploaderStrategy {
-  type = 'picgo_core'
-
-  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
-    // TODO: implement dedicated PicGo-Core behaviour if needed
-    return uploadViaCliAndClipboard(settings, absPath, 'picgo-core')
-  }
-}
-
-const UPLOAD_STRATEGIES: ImageUploaderStrategy[] = [new PicListUploader(), new PicGoUploader(), new PicGoCoreUploader()]
-
-export function resolveUploaderStrategy(type: string | undefined | null): ImageUploaderStrategy | null {
-  if (!type || type === 'none') return null
-  const found = UPLOAD_STRATEGIES.find((s) => s.type === type)
-  if (!found) return null
-  return found
-}
-
-export async function uploadViaCliAndClipboard(
-  settings: ImageFlowPluginSettings,
-  absPath: string,
-  defaultCmd: string
-): Promise<string> {
+export async function uploadViaCliAndClipboard(req: UploadRequest, defaultCmd: string): Promise<string> {
   try {
+    const { settings, absPath } = req
     const cp = require('child_process')
     let cmd = (settings as any).uploaderCommandPath as string | undefined
     cmd = cmd && cmd.trim().length > 0 ? cmd.trim() : undefined
