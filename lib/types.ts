@@ -1,5 +1,5 @@
 import type { ImageFlowSettingsCore } from '../components/types'
 
-export interface MyPluginSettings extends ImageFlowSettingsCore {
+export interface ImageFlowPluginSettings extends ImageFlowSettingsCore {
   mySetting: string
 }

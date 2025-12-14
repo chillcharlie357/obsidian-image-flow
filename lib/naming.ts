@@ -1,4 +1,4 @@
-import type { MyPluginSettings } from './types'
+import type { ImageFlowPluginSettings } from './types'
 import { normalizeDir } from './paths'
 import { log } from './log'
 
@@ -54,7 +54,7 @@ function formatDatePattern(fmt: string) {
     .replace(/ss/g, ss)
 }
 
-export function getTargetDir(settings: MyPluginSettings, activeFile: any, file: any, originalBase: string): string {
+export function getTargetDir(settings: ImageFlowPluginSettings, activeFile: any, file: any, originalBase: string): string {
   const ctxFile = activeFile || file
   const filePath = ctxFile?.parent?.path || ''
   const fileBase = activeFile?.basename || ctxFile?.basename || 'note'
@@ -80,7 +80,7 @@ export function getTargetDir(settings: MyPluginSettings, activeFile: any, file: 
   return dir
 }
 
-export function getTargetBase(settings: MyPluginSettings, originalBase: string, t: Record<string, string>) {
+export function getTargetBase(settings: ImageFlowPluginSettings, originalBase: string, t: Record<string, string>) {
   if (!settings.renameEnabled || settings.keepOriginal) {
     log('getTargetBase keep original', { originalBase })
     return originalBase

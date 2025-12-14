@@ -1,5 +1,5 @@
 import { App, Editor, MarkdownView, Notice } from 'obsidian'
-import type { MyPluginSettings } from './types'
+import type { ImageFlowPluginSettings } from './types'
 import { tokens, getTargetDir, getTargetBase, splitName } from './naming'
 import { ensureFolder, uniquePath, getAbsolutePath, relativePath } from './paths'
 import { resolveUploaderStrategy } from './upload'
@@ -7,7 +7,7 @@ import { log, logError, logWarn } from './log'
 
 export async function handlePaste(
   app: App,
-  settings: MyPluginSettings,
+  settings: ImageFlowPluginSettings,
   evt: ClipboardEvent | DragEvent,
   editor: Editor,
   markdownView: MarkdownView
@@ -90,4 +90,3 @@ export async function handlePaste(
     new Notice('Image Flow: failed to paste image, see console for details')
   }
 }
-

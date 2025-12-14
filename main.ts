@@ -6,13 +6,13 @@ import type { SaveLocationMode, ImageFlowSettingsCore } from './components/types
 import { handlePaste } from './lib/handlePaste'
 
 
-import type { MyPluginSettings } from './lib/types'
+import type { ImageFlowPluginSettings } from './lib/types'
 
 // Remember to rename these classes and interfaces!
 
  
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
     mySetting: 'default',
     renameEnabled: true,
     keepOriginal: false,
@@ -26,8 +26,8 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     deleteLocalAfterUpload: false,
 }
 
-	export default class MyPlugin extends Plugin {
-    settings!: MyPluginSettings
+	export default class ImageFlowPlugin extends Plugin {
+    settings!: ImageFlowPluginSettings
 
 	async onload() {
 		console.log('[Image Flow] Plugin onload start')
@@ -39,7 +39,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
         });
         ribbon.addClass('image-flow-ribbon');
 
-        this.addSettingTab(new SampleSettingTab(this.app, this));
+        this.addSettingTab(new ImageFlowSettingTab(this.app, this));
         console.log('[Image Flow] Setting tab registered')
 
         this.registerEvent(this.app.workspace.on('editor-paste', (evt: ClipboardEvent, editor: Editor, markdownView: MarkdownView) => {
@@ -74,7 +74,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     }
 }
 
-class SampleModal extends Modal {
+class ImageFlowModal extends Modal {
 	constructor(app: App) {
 		super(app);
 	}
@@ -90,11 +90,11 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-    plugin: MyPlugin
+class ImageFlowSettingTab extends PluginSettingTab {
+    plugin: ImageFlowPlugin
     root: Root | undefined
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: ImageFlowPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

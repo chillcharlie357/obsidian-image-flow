@@ -1,4 +1,4 @@
-import type { MyPluginSettings } from './types'
+import type { ImageFlowPluginSettings } from './types'
 import { log, logWarn, logError } from './log'
 
 function httpInText(s: string) {
@@ -8,13 +8,13 @@ function httpInText(s: string) {
 
 export interface ImageUploaderStrategy {
   type: string
-  upload(settings: MyPluginSettings, absPath: string): Promise<string>
+  upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string>
 }
 
 class PicListUploader implements ImageUploaderStrategy {
   type = 'piclist'
 
-  async upload(settings: MyPluginSettings, absPath: string): Promise<string> {
+  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
     return uploadViaCliAndClipboard(settings, absPath, 'piclist')
   }
 }
@@ -22,7 +22,7 @@ class PicListUploader implements ImageUploaderStrategy {
 class PicGoUploader implements ImageUploaderStrategy {
   type = 'picgo'
 
-  async upload(settings: MyPluginSettings, absPath: string): Promise<string> {
+  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
     return uploadViaCliAndClipboard(settings, absPath, 'picgo')
   }
 }
@@ -30,7 +30,7 @@ class PicGoUploader implements ImageUploaderStrategy {
 class PicGoCoreUploader implements ImageUploaderStrategy {
   type = 'picgo_core'
 
-  async upload(settings: MyPluginSettings, absPath: string): Promise<string> {
+  async upload(settings: ImageFlowPluginSettings, absPath: string): Promise<string> {
     // TODO: implement dedicated PicGo-Core behaviour if needed
     return uploadViaCliAndClipboard(settings, absPath, 'picgo-core')
   }
@@ -46,7 +46,7 @@ export function resolveUploaderStrategy(type: string | undefined | null): ImageU
 }
 
 export async function uploadViaCliAndClipboard(
-  settings: MyPluginSettings,
+  settings: ImageFlowPluginSettings,
   absPath: string,
   defaultCmd: string
 ): Promise<string> {
@@ -113,4 +113,3 @@ export async function uploadViaCliAndClipboard(
     return ''
   }
 }
-
