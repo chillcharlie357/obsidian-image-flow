@@ -97,7 +97,7 @@ See https://github.com/obsidianmd/obsidian-api
 
 # Obsidian Image Flow
 
-Language: English | [中文文档](https://github.com/chillcharlie357/obsidian-image-flow/main/docs/README.zh-CN.md)
+Language: English | [中文文档](https://github.com/chillcharlie357/obsidian-image-flow/blob/main/docs/README.zh-CN.md)
 
 A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.
 
