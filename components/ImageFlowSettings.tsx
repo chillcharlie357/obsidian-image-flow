@@ -77,23 +77,7 @@ export default function ImageFlowSettings(props: {
         </div>
       </div>
 
-      <ImageUploadSettings
-        value={{
-          uploadEnabled: local.uploadEnabled,
-          uploaderType: local.uploaderType,
-          uploaderCommandPath: local.uploaderCommandPath,
-          deleteLocalAfterUpload: local.deleteLocalAfterUpload,
-        }}
-        onChange={(v) =>
-          setLocal({
-            ...local,
-            uploadEnabled: v.uploadEnabled,
-            uploaderType: v.uploaderType,
-            uploaderCommandPath: v.uploaderCommandPath,
-            deleteLocalAfterUpload: v.deleteLocalAfterUpload,
-          })
-        }
-      />
+      <ImageUploadSettings value={local} onChange={(v) => setLocal(v)} />
 
       {!local.uploadEnabled && (
         <>

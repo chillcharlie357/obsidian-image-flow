@@ -2,6 +2,14 @@ export type SaveLocationMode = 'vault_assets' | 'filename_assets' | 'filepath_as
 export type ImageSyntaxMode = 'markdown' | 'wikilink'
 export type ImageUploaderType = 'none' | 'picgo' | 'picgo_core' | 'piclist'
 
+export interface ImageUploaderProfile {
+  id: string
+  name: string
+  uploaderType: ImageUploaderType
+  uploaderCommandPath: string
+  deleteLocalAfterUpload: boolean
+}
+
 export interface ImageFlowSettingsCore {
   renameEnabled: boolean
   keepOriginal: boolean
@@ -13,6 +21,8 @@ export interface ImageFlowSettingsCore {
   uploaderType: ImageUploaderType
   uploaderCommandPath: string
   deleteLocalAfterUpload: boolean
+  uploaderProfiles?: ImageUploaderProfile[]
+  activeUploaderProfileId?: string | null
 }
 
 export interface RenameSettingsValue {
