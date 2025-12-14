@@ -17,12 +17,12 @@ export default function ImageFlowSettings(props: {
   return (
     <div className="image-flow-settings">
       <div className="setting-item-heading">
-        <div className="setting-item-name">Image Renaming</div>
+        <div className="setting-item-name">Image Rename</div>
       </div>
 
       <div className="setting-item">
         <div className="setting-item-info">
-          <div className="setting-item-name">Enable image renaming</div>
+          <div className="setting-item-name">Enable image rename</div>
           <div className="setting-item-description">Automatically rename images when pasting</div>
         </div>
         <div className="setting-item-control">

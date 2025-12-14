@@ -1,25 +1,35 @@
 import { App, TFile, Notice, Editor, MarkdownView } from 'obsidian'
 import type { MyPluginSettings } from './types'
 
-// 判断文件名是否为常见图片格式
-function isImage(name: string) {
-  return /\.(png|jpg|jpeg|gif|webp|bmp|svg)$/i.test(name)
+const LOG_PREFIX = '[Image Flow]'
+
+function log(...args: any[]) {
+  console.log(LOG_PREFIX, ...args)
 }
 
-// 辅助函数：数字补零到两位
+function logWarn(...args: any[]) {
+  console.warn(LOG_PREFIX, ...args)
+}
+
+function logError(...args: any[]) {
+  console.error(LOG_PREFIX, ...args)
+}
+
 function pad(n: number) {
   return n.toString().padStart(2, '0')
 }
 
-// 生成重命名/路径中可用的占位符字典
 function tokens(context: { originalBase: string; activeBase?: string; activeDir?: string }) {
   const now = new Date()
   const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
   const time = `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
   const random = Math.random().toString(36).slice(2, 8)
+  const timestamp = String(now.getTime())
+  log('tokens', { context, date, time, timestamp, random })
   return {
     '{date}': date,
     '{time}': time,
+    '{timestamp}': timestamp,
     '{random}': random,
     '{filename}': context.activeBase || 'note',
     '{file_path}': context.activeDir || '',
@@ -27,14 +37,34 @@ function tokens(context: { originalBase: string; activeBase?: string; activeDir?
   }
 }
 
-// 用占位符字典对模式字符串进行简单替换（纯字符串，不使用正则）
 function applyPattern(pattern: string, t: Record<string, string>) {
+  log('applyPattern input', { pattern, tokens: t })
   let s = pattern
   for (const k of Object.keys(t)) {
     const v = t[k]
     s = s.split(k).join(v)
   }
+  s = s.replace(/\{date:([^}]+)\}/g, (_, fmt: string) => formatDatePattern(fmt))
+  log('applyPattern output', s)
   return s
+}
+
+function formatDatePattern(fmt: string) {
+  const now = new Date()
+  const yyyy = String(now.getFullYear())
+  const MM = pad(now.getMonth() + 1)
+  const DD = pad(now.getDate())
+  const HH = pad(now.getHours())
+  const mm = pad(now.getMinutes())
+  const ss = pad(now.getSeconds())
+  return fmt
+    .replace(/YYYY/g, yyyy)
+    .replace(/MM/g, MM)
+    .replace(/DD/g, DD)
+    .replace(/dd/g, DD)
+    .replace(/HH/g, HH)
+    .replace(/mm/g, mm)
+    .replace(/ss/g, ss)
 }
 
 // 简单的路径拼接，保证只有一个 /
@@ -61,7 +91,9 @@ function relativePath(from: string, to: string) {
 // 规范化目录：去掉重复 /、首尾 /
 export function normalizeDir(dir: string) {
   if (!dir) return ''
-  return dir.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+  const normalized = dir.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+  log('normalizeDir', { input: dir, normalized })
+  return normalized
 }
 
 // 根据设置和上下文（当前笔记/图片文件）计算目标目录
@@ -69,23 +101,38 @@ export function getTargetDir(settings: MyPluginSettings, activeFile: TFile | nul
   const ctxFile = activeFile || file
   const filePath = ctxFile?.parent?.path || ''
   const fileBase = activeFile?.basename || ctxFile?.basename || 'note'
-  if (settings.saveLocationMode === 'vault_assets') return 'assets'
+  if (settings.saveLocationMode === 'vault_assets') {
+    const dir = 'assets'
+    log('getTargetDir vault_assets', { originalBase, filePath, fileBase, dir })
+    return dir
+  }
   if (settings.saveLocationMode === 'filename_assets') {
     const dir = filePath ? `${filePath}/${fileBase}.assets` : `${fileBase}.assets`
+    log('getTargetDir filename_assets', { originalBase, filePath, fileBase, dir })
     return normalizeDir(dir)
   }
   if (settings.saveLocationMode === 'filepath_assets') {
     const dir = filePath ? `${filePath}/assets` : 'assets'
+    log('getTargetDir filepath_assets', { originalBase, filePath, fileBase, dir })
     return normalizeDir(dir)
   }
   const t = tokens({ originalBase, activeBase: fileBase, activeDir: filePath })
-  return normalizeDir(applyPattern(settings.customLocationPattern, t))
+  const pat = applyPattern(settings.customLocationPattern, t)
+  const dir = normalizeDir(pat)
+  log('getTargetDir custom', { originalBase, filePath, fileBase, pattern: settings.customLocationPattern, dir })
+  return dir
 }
 
 // 根据设置计算目标文件名（只处理基础名，不含扩展名）
 export function getTargetBase(settings: MyPluginSettings, originalBase: string, t: Record<string, string>) {
-  if (!settings.renameEnabled || settings.keepOriginal) return originalBase
-  return applyPattern(settings.renamePattern, t).replace(/\/+/, '-')
+  if (!settings.renameEnabled || settings.keepOriginal) {
+    log('getTargetBase keep original', { originalBase })
+    return originalBase
+  }
+  const applied = applyPattern(settings.renamePattern, t)
+  const sanitized = applied.replace(/\/+/, '-')
+  log('getTargetBase renamed', { originalBase, pattern: settings.renamePattern, applied, sanitized })
+  return sanitized
 }
 
 // 将文件名拆分为 base 和 ext（无点）
@@ -102,17 +149,17 @@ export async function ensureFolder(app: App, dir: string) {
 
   const folders = normalized.split('/')
   let currentPath = ''
-  
+
   for (const folder of folders) {
     currentPath = currentPath ? `${currentPath}/${folder}` : folder
     const existing = app.vault.getAbstractFileByPath(currentPath)
-    
+
     if (!existing) {
       try {
+        log('ensureFolder createFolder', currentPath)
         await app.vault.createFolder(currentPath)
       } catch (e) {
-        // 如果并发创建可能会报错，这里忽略
-        console.warn(`[Image Flow] Failed to create folder: ${currentPath}`, e)
+        logWarn('ensureFolder failed to create folder', currentPath, e)
       }
     }
   }
@@ -127,6 +174,7 @@ export async function uniquePath(app: App, dir: string, base: string, ext: strin
     candidate = pathJoin(normalized, ext ? `${base}-${n}.${ext}` : `${base}-${n}`)
     n++
   }
+  log('uniquePath', { dir: normalized, base, ext, candidate })
   return candidate
 }
 
@@ -141,7 +189,7 @@ export async function moveRename(app: App, file: TFile, to: string) {
   // 如果路径没变，直接返回
   if (file.path === target) return
 
-  console.log(`[Image Flow] Moving file from ${file.path} to ${target}`)
+  log('moveRename', { from: file.path, to: target })
   try {
     // 再次确保目标目录存在（防御性编程）
     const targetDir = target.substring(0, target.lastIndexOf('/'))
@@ -149,47 +197,82 @@ export async function moveRename(app: App, file: TFile, to: string) {
     
     await app.vault.rename(file, target)
   } catch (error) {
-    console.error(`[Image Flow] Failed to rename file:`, error)
+    logError('Failed to rename file', { from: file.path, to: target, error })
     new Notice(`Image Flow Error: Failed to move file to ${target}`)
   }
 }
 
-export async function handlePaste(app: App, settings: MyPluginSettings, evt: ClipboardEvent | DragEvent, editor: Editor, markdownView: MarkdownView) {
-    const files = evt instanceof ClipboardEvent ? evt.clipboardData?.files : evt.dataTransfer?.files;
+export async function handlePaste(
+  app: App,
+  settings: MyPluginSettings,
+  evt: ClipboardEvent | DragEvent,
+  editor: Editor,
+  markdownView: MarkdownView
+) {
+  try {
+    const viewFile = markdownView?.file || app.workspace.getActiveFile()
+    if (!viewFile) {
+      return
+    }
+
+    const files = evt instanceof ClipboardEvent ? evt.clipboardData?.files : evt.dataTransfer?.files
     if (!files || files.length === 0) {
-        return;
+      return
     }
 
     for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image')) {
-            continue;
+      const file = files[i]
+      if (!file.type.startsWith('image')) {
+        continue
+      }
+
+      evt.preventDefault()
+
+      const activeFile = viewFile
+      const { base, ext } = splitName(file.name)
+      const t = tokens({
+        originalBase: base,
+        activeBase: activeFile?.basename ?? '',
+        activeDir: activeFile?.parent?.path ?? '',
+      })
+      const dir = getTargetDir(settings, activeFile, null, base)
+      await ensureFolder(app, dir)
+
+      const newBase = getTargetBase(settings, base, t)
+      const dest = await uniquePath(app, dir, newBase, ext)
+
+      const buffer = await file.arrayBuffer()
+      const newFile = await app.vault.createBinary(dest, buffer)
+
+      const link = app.fileManager.generateMarkdownLink(newFile, activeFile?.path ?? '')
+      let imageSyntax: string
+      if (settings.imageSyntaxMode === 'markdown') {
+        const notePath = activeFile?.path || ''
+        const rel = relativePath(notePath, newFile.path)
+        /***
+         * https://forum-zh.obsidian.md/t/topic/28956
+         * 
+         * obsidian纯数字alt会导致图片无法渲染，添加扩展名或image字符串避免这个问题
+         */
+        let alt = newFile.basename
+        if (/^\d+$/.test(alt)) {
+          alt = `${alt}.${ext || newFile.extension || 'image'}`
         }
-
-        evt.preventDefault();
-
-        const activeFile = app.workspace.getActiveFile();
-        const { base, ext } = splitName(file.name);
-        const t = tokens({ originalBase: base, activeBase: activeFile?.basename ?? '', activeDir: activeFile?.parent?.path ?? '' });
-        const dir = getTargetDir(settings, activeFile, null, base);
-        await ensureFolder(app, dir);
-
-        const newBase = getTargetBase(settings, base, t);
-        const dest = await uniquePath(app, dir, newBase, ext);
-
-        const buffer = await file.arrayBuffer();
-        const newFile = await app.vault.createBinary(dest, buffer);
-
-        const link = app.fileManager.generateMarkdownLink(newFile, markdownView.file?.path ?? '');
-        let imageSyntax: string
-        if (settings.imageSyntaxMode === 'markdown') {
-          const notePath = markdownView.file?.path || activeFile?.path || ''
-          const rel = relativePath(notePath, newFile.path)
-          const alt = newFile.basename
-          imageSyntax = `![${alt}](${rel})`
-        } else {
-          imageSyntax = link.startsWith('!') ? link : `!${link}`
-        }
-        editor.replaceSelection(imageSyntax);
+        imageSyntax = `![${alt}](${rel})`
+      } else {
+        imageSyntax = link.startsWith('!') ? link : `!${link}`
+      }
+      log('handlePaste insert', {
+        mode: settings.imageSyntaxMode,
+        link,
+        imageSyntax,
+        filePath: newFile.path,
+        notePath: activeFile?.path,
+      })
+      editor.replaceSelection(imageSyntax)
     }
+  } catch (error) {
+    logError('handlePaste failed', error)
+    new Notice('Image Flow: failed to paste image, see console for details')
+  }
 }

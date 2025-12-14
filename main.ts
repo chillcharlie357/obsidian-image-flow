@@ -26,7 +26,9 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     settings!: MyPluginSettings
 
 	async onload() {
+		console.log('[Image Flow] Plugin onload start')
 		await this.loadSettings();
+        console.log('[Image Flow] Settings loaded', this.settings)
 
         const ribbon = this.addRibbonIcon('dice', 'Image Flow', () => {
             new Notice('Configure Image Flow in Settings > Community plugins > Image Flow');
@@ -34,25 +36,36 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
         ribbon.addClass('image-flow-ribbon');
 
         this.addSettingTab(new SampleSettingTab(this.app, this));
+        console.log('[Image Flow] Setting tab registered')
 
         this.registerEvent(this.app.workspace.on('editor-paste', (evt: ClipboardEvent, editor: Editor, markdownView: MarkdownView) => {
+            console.log('[Image Flow] editor-paste event', {
+                hasClipboard: !!evt.clipboardData,
+                file: markdownView?.file?.path,
+            })
             handlePaste(this.app, this.settings, evt, editor, markdownView);
         }));
 
         this.registerEvent(this.app.workspace.on('editor-drop', (evt: DragEvent, editor: Editor, markdownView: MarkdownView) => {
+            console.log('[Image Flow] editor-drop event', {
+                hasDataTransfer: !!evt.dataTransfer,
+                file: markdownView?.file?.path,
+            })
             handlePaste(this.app, this.settings, evt, editor, markdownView);
         }));
     }
 
 	onunload() {
-
+        console.log('[Image Flow] Plugin onunload')
 	}
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        console.log('[Image Flow] loadSettings merged result', this.settings)
 	}
 
     async saveSettings() {
+        console.log('[Image Flow] saveSettings', this.settings)
         await this.saveData(this.settings);
     }
 }
@@ -85,6 +98,7 @@ class SampleSettingTab extends PluginSettingTab {
 	display(): void {
 		const {containerEl} = this;
 		containerEl.empty();
+        console.log('[Image Flow] SettingTab display')
         const host = containerEl.createDiv()
         this.root = createRoot(host)
         this.root.render(React.createElement(ImageFlowSettings, {
@@ -98,6 +112,7 @@ class SampleSettingTab extends PluginSettingTab {
 
     hide(): void {
         if (this.root) {
+            console.log('[Image Flow] SettingTab hide, unmount React root')
             this.root.unmount()
             this.root = undefined
         }
