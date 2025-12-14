@@ -1,3 +1,4 @@
+<!--
 # Obsidian Sample Plugin
 
 This is a sample plugin for Obsidian (https://obsidian.md).
@@ -92,5 +93,55 @@ If you have multiple URLs, you can also do:
 ## API Documentation
 
 See https://github.com/obsidianmd/obsidian-api
+-->
+
+# Obsidian Image Flow
+
+Language: English | [中文文档](https://github.com/chillcharlie357/obsidian-image-flow/main/docs/README.zh-CN.md)
+
+A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.
+
+It listens to paste and drag‑and‑drop events in the editor, saves image files to your vault following configurable rules, and optionally uploads them via external CLI tools such as PicList, PicGo, or PicGo-Core.
+
+## Features
+
+- Automatic handling of pasted / dragged images
+  - Intercepts editor paste and drop events, saves images into the vault and inserts links into the note.
+  - Supports two link syntaxes:
+    - Markdown: `![alt](path/to/image.png)`
+    - Obsidian wikilink: `![[image.png]]`
+
+- Image renaming
+  - Optional toggle to enable or disable automatic renaming.
+  - Option to keep the original filename.
+  - Custom rename pattern with a default of `{date}-{time}-{random}`.
+  - Supported placeholders:
+    - `{date}`, `{time}`, `{timestamp}`, `{date:YYYYMMDD}`, `{random}`, `{filename}`.
+
+- Save location rules
+  - When upload is disabled, images are stored locally using flexible rules:
+    - `Vault Assets`: always save to `assets/`
+    - `Current File Assets`: save to `{filename}.assets/`
+    - `Current Folder Assets`: save to `{file_path}/assets/`
+    - `Custom`: arbitrary directory pattern with placeholders such as `{vault}`, `{date}`, `{filename}`, `{file_path}`.
+
+- Image upload (PicList / PicGo / PicGo-Core)
+  - Optional upload flow that runs after the image is saved locally.
+  - Built‑in strategies for `piclist`, `picgo`, and `picgo_core`.
+  - Configurable command: use a bare command name or an absolute path.
+  - Upload flow:
+    - Execute the uploader CLI.
+    - Extract the image URL from stdout / stderr or clipboard.
+    - Replace the inserted image link with the remote URL.
+  - Optional “delete local image after upload” toggle.
+
+- Upload profiles
+  - Group upload‑related settings into reusable profiles.
+  - Default profile is created automatically the first time upload is enabled.
+  - Profile operations:
+    - Rename the active profile.
+    - Copy the active profile.
+    - Delete the active profile (at least one profile is always kept).
+  - Switching profiles automatically updates uploader type, command path, and the “delete local image after upload” flag.
 
 
