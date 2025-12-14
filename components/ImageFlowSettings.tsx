@@ -82,6 +82,7 @@ export default function ImageFlowSettings(props: {
           uploadEnabled: local.uploadEnabled,
           uploaderType: local.uploaderType,
           uploaderCommandPath: local.uploaderCommandPath,
+          deleteLocalAfterUpload: local.deleteLocalAfterUpload,
         }}
         onChange={(v) =>
           setLocal({
@@ -89,6 +90,7 @@ export default function ImageFlowSettings(props: {
             uploadEnabled: v.uploadEnabled,
             uploaderType: v.uploaderType,
             uploaderCommandPath: v.uploaderCommandPath,
+            deleteLocalAfterUpload: v.deleteLocalAfterUpload,
           })
         }
       />

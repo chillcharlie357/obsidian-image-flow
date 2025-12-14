@@ -12,6 +12,7 @@ export interface ImageFlowSettingsCore {
   uploadEnabled: boolean
   uploaderType: ImageUploaderType
   uploaderCommandPath: string
+  deleteLocalAfterUpload: boolean
 }
 
 export interface RenameSettingsValue {

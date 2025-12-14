@@ -3,7 +3,7 @@ import { createRoot, Root } from 'react-dom/client'
 import React from 'react'
 import ImageFlowSettings from './components/ImageFlowSettings'
 import type { SaveLocationMode, ImageFlowSettingsCore } from './components/types'
-import { handlePaste } from './lib/imageFlow'
+import { handlePaste } from './lib/handlePaste'
 
 
 import type { MyPluginSettings } from './lib/types'
@@ -23,6 +23,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     uploadEnabled: false,
     uploaderType: 'none',
     uploaderCommandPath: '',
+    deleteLocalAfterUpload: false,
 }
 
 	export default class MyPlugin extends Plugin {

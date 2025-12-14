@@ -1,11 +1,13 @@
 import type { ImageFlowSettingsCore } from './types'
 
 export default function ImageUploadSettings(props: {
-  value: Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath'>
-  onChange: (v: Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath'>) => void
+  value: Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath' | 'deleteLocalAfterUpload'>
+  onChange: (v: Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath' | 'deleteLocalAfterUpload'>) => void
 }) {
   const { value, onChange } = props
-  function set(next: Partial<Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath'>>) {
+  function set(
+    next: Partial<Pick<ImageFlowSettingsCore, 'uploadEnabled' | 'uploaderType' | 'uploaderCommandPath' | 'deleteLocalAfterUpload'>>
+  ) {
     onChange({ ...value, ...next })
   }
   return (
@@ -87,6 +89,32 @@ export default function ImageUploadSettings(props: {
                     : 'picgo'
                 }
               />
+            </div>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-item-info">
+              <div className="setting-item-name">Delete local image after upload</div>
+              <div className="setting-item-description">
+                When enabled, the local image file will be removed after a successful upload.
+              </div>
+            </div>
+            <div className="setting-item-control">
+              <div
+                className={`checkbox-container ${value.deleteLocalAfterUpload ? 'is-enabled' : ''}`}
+                role="checkbox"
+                aria-checked={value.deleteLocalAfterUpload}
+                tabIndex={0}
+                onClick={() => set({ deleteLocalAfterUpload: !value.deleteLocalAfterUpload })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    set({ deleteLocalAfterUpload: !value.deleteLocalAfterUpload })
+                  }
+                }}
+              >
+                <input type="checkbox" checked={value.deleteLocalAfterUpload} tabIndex={-1} readOnly />
+              </div>
             </div>
           </div>
         </>
