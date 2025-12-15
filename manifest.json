@@ -3,9 +3,9 @@
 	"name": "Image Flow",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A plugin for Obsidian that allows you to flow images in your notes.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.",
+	"author": "chillcharlie357",
+	"authorUrl": "https://github.com/chillcharlie357",
+	"fundingUrl": "https://github.com/chillcharlie357",
+	"isDesktopOnly": true
 }
