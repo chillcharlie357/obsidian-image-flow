@@ -128,6 +128,7 @@ It listens to paste and drag‑and‑drop events in the editor, saves image file
 - Image upload (PicList / PicGo / PicGo-Core)
   - Optional upload flow that runs after the image is saved locally.
   - Built‑in strategies for `piclist`, `picgo`, and `picgo_core`.
+  - Image upload supports PicList as an uploader option: https://github.com/Kuingsmile/PicList.
   - Configurable command: use a bare command name or an absolute path.
   - Upload flow:
     - Execute the uploader CLI.

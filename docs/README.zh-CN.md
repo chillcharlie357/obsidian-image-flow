@@ -33,6 +33,7 @@
   - 可在设置中开启“图片上传”，在本地保存之后调用外部 CLI 完成上传。
   - 内置三种上传策略：
     - `piclist`、`picgo`、`picgo_core`
+  - 图片上传支持使用 PicList，项目地址：https://github.com/Kuingsmile/PicList。
   - 上传命令可配置：
     - 只写命令名（如 `picgo`、`picgo-core`、`piclist`），依赖系统 `PATH`。
     - 或填写完整绝对路径。
