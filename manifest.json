@@ -3,7 +3,7 @@
 	"name": "Image Flow",
 	"version": "1.0.5",
 	"minAppVersion": "1.0.4",
-	"description": "A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.",
+	"description": "A plugin that streamlines how images are pasted, stored, and uploaded.",
 	"author": "chillcharlie357",
 	"authorUrl": "https://github.com/chillcharlie357",
 	"fundingUrl": "https://github.com/chillcharlie357",
