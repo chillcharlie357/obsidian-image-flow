@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { LocationSettingsValue, NoteContext, SaveLocationMode } from './types'
+import { normalizeDir } from '../lib/paths'
 
 const OPTIONS: { value: SaveLocationMode; label: string; desc: string }[] = [
   { value: 'vault_assets', label: 'Vault Assets', desc: 'Save to vault/assets/' },
@@ -29,16 +30,12 @@ export default function LocationSettings(props: {
         : local.saveLocationMode === 'filepath_assets'
         ? `${props.ctx?.file_path || ''}/assets/`
         : local.customLocationPattern
-    return normalizeDir(base)
+    const replaced = base
       .replace(/\{date\}/g, date)
       .replace(/\{filename\}/g, props.ctx?.filename || '{filename}')
       .replace(/\{file_path\}/g, props.ctx?.file_path || '')
       .replace(/\{vault\}\//g, '')
-  }
-
-  function normalizeDir(dir: string) {
-    if (!dir) return ''
-    return dir.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+    return normalizeDir(replaced)
   }
 
   return (
