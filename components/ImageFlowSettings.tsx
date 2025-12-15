@@ -1,19 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import type { ImageFlowSettingsCore, NoteContext } from './types'
 import RenameSettings from './RenameSettings'
 import LocationSettings from './LocationSettings'
 import ImageUploadSettings from './ImageUploadSettings'
+import { useSettingsStore } from './settingsStore'
 
 export default function ImageFlowSettings(props: {
   settings: ImageFlowSettingsCore
   onSave: (s: ImageFlowSettingsCore) => void
   ctx?: NoteContext
 }) {
-  const [local, setLocal] = useState<ImageFlowSettingsCore>({ ...props.settings })
+  const local = useSettingsStore((s) => s.settings)
 
   useEffect(() => {
-    props.onSave(local)
-  }, [local])
+    useSettingsStore.getState().init(props.settings, props.onSave)
+  }, [props.settings, props.onSave])
 
   return (
     <div className="image-flow-settings">
@@ -32,11 +33,13 @@ export default function ImageFlowSettings(props: {
             role="checkbox"
             aria-checked={local.renameEnabled}
             tabIndex={0}
-            onClick={() => setLocal({ ...local, renameEnabled: !local.renameEnabled })}
+            onClick={() =>
+              useSettingsStore.getState().setRenameEnabled(!local.renameEnabled)
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                setLocal({ ...local, renameEnabled: !local.renameEnabled })
+                useSettingsStore.getState().setRenameEnabled(!local.renameEnabled)
               }
             }}
           >
@@ -45,28 +48,13 @@ export default function ImageFlowSettings(props: {
         </div>
       </div>
 
-      {local.renameEnabled && (
-        <RenameSettings
-          value={{ renamePattern: local.renamePattern, keepOriginal: local.keepOriginal }}
-          onChange={(v) => setLocal({ ...local, renamePattern: v.renamePattern, keepOriginal: v.keepOriginal })}
-        />
-      )}
+      {local.renameEnabled && <RenameSettings />}
 
       <div className="setting-item-heading">
         <div className="setting-item-name">Save Location</div>
       </div>
 
-      <LocationSettings
-        value={{ saveLocationMode: local.saveLocationMode, customLocationPattern: local.customLocationPattern }}
-        ctx={props.ctx}
-        onChange={(v) =>
-          setLocal({
-            ...local,
-            saveLocationMode: v.saveLocationMode,
-            customLocationPattern: v.customLocationPattern,
-          })
-        }
-      />
+      <LocationSettings ctx={props.ctx} />
 
       <div className="setting-item-heading">
         <div className="setting-item-name">Image Syntax</div>
@@ -81,10 +69,7 @@ export default function ImageFlowSettings(props: {
           <select
             value={local.imageSyntaxMode}
             onChange={(e) =>
-              setLocal({
-                ...local,
-                imageSyntaxMode: e.target.value as any,
-              })
+              useSettingsStore.getState().setImageSyntaxMode(e.target.value as any)
             }
           >
             <option value="markdown">Markdown: ![alt](path/to/image.png)</option>
@@ -93,7 +78,7 @@ export default function ImageFlowSettings(props: {
         </div>
       </div>
 
-      <ImageUploadSettings settings={local} onChange={(v) => setLocal(v)} />
+      <ImageUploadSettings />
     </div>
   )
 }

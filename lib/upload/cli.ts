@@ -11,10 +11,9 @@ function httpInText(s: string) {
 
 export async function uploadViaCliAndClipboard(req: UploadRequest, defaultCmd: string): Promise<string> {
   try {
-    const { settings, absPath } = req
+    const { absPath, uploaderCommandPath } = req
     const cp = require('child_process')
-    let cmd = (settings as any).uploaderCommandPath as string | undefined
-    cmd = cmd && cmd.trim().length > 0 ? cmd.trim() : undefined
+    let cmd = uploaderCommandPath && uploaderCommandPath.trim().length > 0 ? uploaderCommandPath.trim() : undefined
     let args: string[] = []
     cmd = cmd || defaultCmd
     args = ['upload', absPath]

@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useSettingsStore } from './settingsStore'
 import type { RenameSettingsValue } from './types'
 
-export default function RenameSettings(props: {
-  value: RenameSettingsValue
-  onChange: (v: RenameSettingsValue) => void
-}) {
+export default function RenameSettings() {
   const DEFAULT_RENAME_PATTERN = '{date}-{time}-{random}'
-  const [local, setLocal] = useState<RenameSettingsValue>({ ...props.value })
-  useEffect(() => props.onChange(local), [local])
+  const keepOriginal = useSettingsStore((s) => s.settings.keepOriginal)
+  const renamePattern = useSettingsStore((s) => s.settings.renamePattern)
+  const setKeepOriginal = useSettingsStore((s) => s.setKeepOriginal)
+  const setRenamePattern = useSettingsStore((s) => s.setRenamePattern)
 
   function sampleName() {
-    return generateName('image.png', local)
+    return generateName('image.png', {
+      keepOriginal,
+      renamePattern,
+    })
   }
   function generateName(original: string, v: RenameSettingsValue) {
     const base = original.replace(/\.[^/.]+$/, '')
@@ -57,19 +59,19 @@ export default function RenameSettings(props: {
         </div>
         <div className="setting-item-control">
           <div
-            className={`checkbox-container ${local.keepOriginal ? 'is-enabled' : ''}`}
+            className={`checkbox-container ${keepOriginal ? 'is-enabled' : ''}`}
             role="checkbox"
-            aria-checked={local.keepOriginal}
+            aria-checked={keepOriginal}
             tabIndex={0}
-            onClick={() => setLocal({ ...local, keepOriginal: !local.keepOriginal })}
+            onClick={() => setKeepOriginal(!keepOriginal)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                setLocal({ ...local, keepOriginal: !local.keepOriginal })
+                setKeepOriginal(!keepOriginal)
               }
             }}
           >
-            <input type="checkbox" checked={local.keepOriginal} tabIndex={-1} readOnly />
+            <input type="checkbox" checked={keepOriginal} tabIndex={-1} readOnly />
           </div>
         </div>
       </div>
@@ -92,9 +94,9 @@ export default function RenameSettings(props: {
         <div className="setting-item-control">
           <input
             type="text"
-            value={local.renamePattern}
-            onChange={(e) => setLocal({ ...local, renamePattern: e.target.value })}
-            disabled={local.keepOriginal}
+            value={renamePattern}
+            onChange={(e) => setRenamePattern(e.target.value)}
+            disabled={keepOriginal}
             placeholder={DEFAULT_RENAME_PATTERN}
           />
           <button
@@ -102,8 +104,8 @@ export default function RenameSettings(props: {
             className="clickable-icon"
             title="reset"
             aria-label="reset"
-            disabled={local.keepOriginal || local.renamePattern === DEFAULT_RENAME_PATTERN}
-            onClick={() => setLocal({ ...local, renamePattern: DEFAULT_RENAME_PATTERN })}
+            disabled={keepOriginal || renamePattern === DEFAULT_RENAME_PATTERN}
+            onClick={() => setRenamePattern(DEFAULT_RENAME_PATTERN)}
           >
             ↺
           </button>

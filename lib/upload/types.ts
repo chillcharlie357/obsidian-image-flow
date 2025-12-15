@@ -1,8 +1,6 @@
-import type { ImageFlowPluginSettings } from '../types'
-
 export interface UploadRequest {
-  settings: ImageFlowPluginSettings
   absPath: string
+  uploaderCommandPath?: string
 }
 
 export interface ImageUploaderStrategy {

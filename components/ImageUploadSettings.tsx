@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from "react";
 import type { ImageFlowSettingsCore, ImageUploaderProfile } from "./types";
 import { UploadContext } from "../lib/upload";
+import { useSettingsStore } from "./settingsStore";
 
-export default function ImageUploadSettings(props: {
-	settings: ImageFlowSettingsCore;
-	onChange: (v: ImageFlowSettingsCore) => void;
-}) {
-	const { settings, onChange } = props;
+export default function ImageUploadSettings() {
+	const settings = useSettingsStore((s) => s.settings);
+	const setAll = useSettingsStore((s) => s.setAll);
 	const profiles: ImageUploaderProfile[] = settings.uploaderProfiles || [];
 	const activeProfile =
 		profiles.find((p) => p.id === settings.activeUploaderProfileId) || null;
@@ -17,7 +16,11 @@ export default function ImageUploadSettings(props: {
 			(settings.uploaderType && settings.uploaderType !== "none"
 				? settings.uploaderType
 				: null);
-		const c = new UploadContext(settings as any, initialType as any);
+		const c = new UploadContext({
+			uploaderType: initialType as any,
+			uploaderCommandPath: settings.uploaderCommandPath,
+			uploaderConfigs: settings.uploaderConfigs as any,
+		});
 		c.updateWithProfile(activeProfile || undefined);
 		return c;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,7 +45,7 @@ export default function ImageUploadSettings(props: {
 			);
 			merged = { ...merged, uploaderProfiles: nextProfiles };
 		}
-		onChange({ ...settings, ...merged });
+		setAll({ ...settings, ...merged });
 	}
 
 	useEffect(() => {
@@ -59,30 +62,6 @@ export default function ImageUploadSettings(props: {
 			set({ uploaderProfiles: [profile], activeUploaderProfileId: id });
 		}
 	}, [settings.uploadEnabled]);
-
-	function addProfileFromCurrent() {
-		const nextProfiles = [...profiles];
-		const id = `profile_${Date.now()}_${nextProfiles.length}`;
-		const profile: ImageUploaderProfile = {
-			id,
-			name: `Profile ${nextProfiles.length + 1}`,
-			uploaderType: settings.uploaderType,
-			uploaderCommandPath: settings.uploaderCommandPath,
-			deleteLocalAfterUpload: settings.deleteLocalAfterUpload,
-		};
-		nextProfiles.push(profile);
-		set({
-			uploaderProfiles: nextProfiles,
-			activeUploaderProfileId: id,
-		});
-	}
-
-	function updateProfile(id: string, patch: Partial<ImageUploaderProfile>) {
-		const nextProfiles = profiles.map((p) =>
-			p.id === id ? { ...p, ...patch } : p
-		);
-		set({ uploaderProfiles: nextProfiles });
-	}
 
 	function useProfile(profile: ImageUploaderProfile) {
 		set({

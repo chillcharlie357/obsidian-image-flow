@@ -5,15 +5,11 @@ import ImageFlowSettings from './components/ImageFlowSettings'
 import type { SaveLocationMode, ImageFlowSettingsCore } from './components/types'
 import { handlePaste } from './lib/handlePaste'
 
-
-import type { ImageFlowPluginSettings } from './lib/types'
-
 // Remember to rename these classes and interfaces!
 
  
 
-const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
-    mySetting: 'default',
+const DEFAULT_SETTINGS: ImageFlowSettingsCore = {
     renameEnabled: true,
     keepOriginal: false,
     renamePattern: '{date}-{time}-{random}',
@@ -37,8 +33,8 @@ const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
     },
 }
 
-	export default class ImageFlowPlugin extends Plugin {
-    settings!: ImageFlowPluginSettings
+export default class ImageFlowPlugin extends Plugin {
+    settings!: ImageFlowSettingsCore
 
 	async onload() {
 		console.log('[Image Flow] Plugin onload start')
@@ -58,7 +54,7 @@ const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
                 hasClipboard: !!evt.clipboardData,
                 file: markdownView?.file?.path,
             })
-            handlePaste(this.app, this.settings, evt, editor, markdownView);
+            handlePaste(this.app, evt, editor, markdownView);
         }));
 
         this.registerEvent(this.app.workspace.on('editor-drop', (evt: DragEvent, editor: Editor, markdownView: MarkdownView) => {
@@ -66,7 +62,7 @@ const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
                 hasDataTransfer: !!evt.dataTransfer,
                 file: markdownView?.file?.path,
             })
-            handlePaste(this.app, this.settings, evt, editor, markdownView);
+            handlePaste(this.app, evt, editor, markdownView);
         }));
     }
 

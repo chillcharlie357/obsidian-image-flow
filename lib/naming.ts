@@ -1,4 +1,4 @@
-import type { ImageFlowPluginSettings } from './types'
+import type { SaveLocationMode } from '../components/types'
 import { normalizeDir } from './paths'
 import { log } from './log'
 
@@ -54,42 +54,66 @@ function formatDatePattern(fmt: string) {
     .replace(/ss/g, ss)
 }
 
-export function getTargetDir(settings: ImageFlowPluginSettings, activeFile: any, file: any, originalBase: string): string {
+export function getTargetDir(
+  saveLocationMode: SaveLocationMode,
+  customLocationPattern: string,
+  activeFile: any,
+  file: any,
+  originalBase: string,
+): string {
   const ctxFile = activeFile || file
   const filePath = ctxFile?.parent?.path || ''
   const fileBase = activeFile?.basename || ctxFile?.basename || 'note'
-  if (settings.saveLocationMode === 'vault_assets') {
+  if (saveLocationMode === 'vault_assets') {
     const dir = 'assets'
     log('getTargetDir vault_assets', { originalBase, filePath, fileBase, dir })
     return dir
   }
-  if (settings.saveLocationMode === 'filename_assets') {
+  if (saveLocationMode === 'filename_assets') {
     const dir = filePath ? `${filePath}/${fileBase}.assets` : `${fileBase}.assets`
     log('getTargetDir filename_assets', { originalBase, filePath, fileBase, dir })
     return normalizeDir(dir)
   }
-  if (settings.saveLocationMode === 'filepath_assets') {
+  if (saveLocationMode === 'filepath_assets') {
     const dir = filePath ? `${filePath}/assets` : 'assets'
     log('getTargetDir filepath_assets', { originalBase, filePath, fileBase, dir })
     return normalizeDir(dir)
   }
   const t = tokens({ originalBase, activeBase: fileBase, activeDir: filePath })
-  const pat = applyPattern(settings.customLocationPattern, t)
+  const pat = applyPattern(customLocationPattern, t)
   const dir = normalizeDir(pat)
-  log('getTargetDir custom', { originalBase, filePath, fileBase, pattern: settings.customLocationPattern, dir })
+  log('getTargetDir custom', {
+    originalBase,
+    filePath,
+    fileBase,
+    pattern: customLocationPattern,
+    dir,
+  })
   return dir
 }
 
-export function getTargetBase(settings: ImageFlowPluginSettings, originalBase: string, t: Record<string, string>) {
-  if (!settings.renameEnabled || settings.keepOriginal) {
+export function getTargetBase(
+  renameEnabled: boolean,
+  keepOriginal: boolean,
+  renamePattern: string,
+  originalBase: string,
+  t: Record<string, string>,
+) {
+  if (!renameEnabled || keepOriginal) {
     const sanitized = normalizeDir(originalBase)
     log('getTargetBase keep original', { originalBase, sanitized })
     return sanitized
   }
-  const applied = applyPattern(settings.renamePattern, t)
+  const applied = applyPattern(renamePattern, t)
   const replaced = applied.replace(/\/+/, '-')
   const sanitized = normalizeDir(replaced)
-  log('getTargetBase renamed', { originalBase, pattern: settings.renamePattern, applied, replaced, sanitized })
+  log('getTargetBase renamed', {
+    originalBase,
+    pattern: renamePattern,
+    applied,
+    replaced,
+    sanitized,
+  })
   return sanitized
 }
 

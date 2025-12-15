@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { LocationSettingsValue, NoteContext, SaveLocationMode } from './types'
+import type { NoteContext, SaveLocationMode } from './types'
 import { normalizeDir } from '../lib/paths'
+import { useSettingsStore } from './settingsStore'
 
 const OPTIONS: { value: SaveLocationMode; label: string; desc: string }[] = [
   { value: 'vault_assets', label: 'Vault Assets', desc: 'Save to vault/assets/' },
@@ -10,26 +10,24 @@ const OPTIONS: { value: SaveLocationMode; label: string; desc: string }[] = [
 ]
 
 export default function LocationSettings(props: {
-  value: LocationSettingsValue
   ctx?: NoteContext
-  onChange: (v: LocationSettingsValue) => void
   disabled?: boolean
 }) {
-  const [local, setLocal] = useState<LocationSettingsValue>({ ...props.value })
-  useEffect(() => props.onChange(local), [local])
+  const mode = useSettingsStore((s) => s.settings.saveLocationMode)
+  const pattern = useSettingsStore((s) => s.settings.customLocationPattern)
 
   function preview() {
     const now = new Date()
     const pad = (n: number) => n.toString().padStart(2, '0')
     const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
     const base =
-      local.saveLocationMode === 'vault_assets'
+      mode === 'vault_assets'
         ? 'assets/'
-        : local.saveLocationMode === 'filename_assets'
+      : mode === 'filename_assets'
         ? `${props.ctx?.filename || '{filename}'}.assets/`
-        : local.saveLocationMode === 'filepath_assets'
+      : mode === 'filepath_assets'
         ? `${props.ctx?.file_path || ''}/assets/`
-        : local.customLocationPattern
+        : pattern || ''
     const replaced = base
       .replace(/\{date\}/g, date)
       .replace(/\{filename\}/g, props.ctx?.filename || '{filename}')
@@ -48,9 +46,11 @@ export default function LocationSettings(props: {
         <div className="setting-item-control">
           <select
             className="dropdown"
-            value={local.saveLocationMode}
+            value={mode}
             disabled={props.disabled}
-            onChange={(e) => setLocal({ ...local, saveLocationMode: e.target.value as SaveLocationMode })}
+            onChange={(e) =>
+              useSettingsStore.getState().setSaveLocationMode(e.target.value as SaveLocationMode)
+            }
           >
             {OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -61,7 +61,7 @@ export default function LocationSettings(props: {
         </div>
       </div>
 
-      {local.saveLocationMode === 'custom' && (
+      {mode === 'custom' && (
         <div className="setting-item">
           <div className="setting-item-info">
             <div className="setting-item-name">Custom Path Pattern</div>
@@ -72,9 +72,11 @@ export default function LocationSettings(props: {
           <div className="setting-item-control">
             <input
               type="text"
-              value={local.customLocationPattern}
+              value={pattern}
               disabled={props.disabled}
-              onChange={(e) => setLocal({ ...local, customLocationPattern: e.target.value })}
+              onChange={(e) =>
+                useSettingsStore.getState().setCustomLocationPattern(e.target.value)
+              }
               placeholder={'{vault}/assets/{date}/'}
             />
           </div>

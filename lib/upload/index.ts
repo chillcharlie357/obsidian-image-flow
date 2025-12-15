@@ -1,12 +1,23 @@
 import type { ImageUploaderStrategy, UploadRequest } from './types'
-import type { ImageFlowPluginSettings } from '../types'
-import type { ImageUploaderProfile } from '../../components/types'
 import { PicListUploader } from './piclist'
 import { PicGoUploader } from './picgo'
 import { PicGoCoreUploader } from './picgoCore'
 import { log, logWarn } from '../log'
 
 export * from './types'
+
+type UploaderConfigMap = Record<string, Record<string, unknown> | undefined>
+
+interface UploadContextOptions {
+  uploaderType: string | undefined | null
+  uploaderCommandPath?: string
+  uploaderConfigs?: UploaderConfigMap
+}
+
+interface UploaderProfileLike {
+  uploaderType?: string | null
+  uploaderCommandPath?: string
+}
 
 function createUploaderStrategy(type: string | undefined | null): ImageUploaderStrategy | null {
   if (!type || type === 'none') return null
@@ -17,40 +28,48 @@ function createUploaderStrategy(type: string | undefined | null): ImageUploaderS
   return null
 }
 
-function resolveUploaderConfig(settings: ImageFlowPluginSettings, type: string | undefined | null): Record<string, unknown> {
+function resolveUploaderConfig(
+  configs: UploaderConfigMap | undefined,
+  type: string | undefined | null
+): Record<string, unknown> {
   if (!type || type === 'none') return {}
-  const all = settings.uploaderConfigs || {}
+  const all = configs || {}
   const cfg = all[type]
   if (cfg && typeof cfg === 'object') return cfg
   return {}
 }
 
 export class UploadContext {
-  settings: ImageFlowPluginSettings
   private strategy: ImageUploaderStrategy | null
+  private uploaderCommandPath?: string
+  private uploaderConfigs: UploaderConfigMap
 
-  constructor(settings: ImageFlowPluginSettings, type: string | undefined | null) {
-    this.settings = settings
-    const strategy = createUploaderStrategy(type)
+  constructor(options: UploadContextOptions) {
+    const { uploaderType, uploaderCommandPath, uploaderConfigs } = options
+    this.uploaderCommandPath = uploaderCommandPath
+    this.uploaderConfigs = uploaderConfigs || {}
+    const effectiveType = uploaderType && uploaderType !== 'none' ? uploaderType : null
+    const strategy = createUploaderStrategy(effectiveType)
     if (strategy) {
-      strategy.config = resolveUploaderConfig(settings, type)
+      strategy.config = resolveUploaderConfig(this.uploaderConfigs, effectiveType)
       log('UploadContext strategy created', {
         type: strategy.type,
         configKeys: Object.keys(strategy.config || {}),
       })
-    }
-    if (!strategy) {
-      logWarn('UploadContext created with no strategy', { type })
+    } else {
+      logWarn('UploadContext created with no strategy', { type: uploaderType })
     }
     this.strategy = strategy
   }
 
-  updateWithProfile(profile?: ImageUploaderProfile | null) {
+  updateWithProfile(profile?: UploaderProfileLike | null) {
     const type =
-      (profile && profile.uploaderType) || (this.settings as any).uploaderType
+      profile && profile.uploaderType && profile.uploaderType !== 'none'
+        ? profile.uploaderType
+        : null
     const strategy = createUploaderStrategy(type)
     if (strategy) {
-      strategy.config = resolveUploaderConfig(this.settings, type)
+      strategy.config = resolveUploaderConfig(this.uploaderConfigs, type)
       log('UploadContext strategy updated', {
         type: strategy.type,
         configKeys: Object.keys(strategy.config || {}),
@@ -59,6 +78,9 @@ export class UploadContext {
       logWarn('UploadContext updateWithProfile: no strategy', { type })
     }
     this.strategy = strategy
+    if (profile && profile.uploaderCommandPath !== undefined) {
+      this.uploaderCommandPath = profile.uploaderCommandPath
+    }
   }
 
   getConfig<T>(key: string, defaultValue?: T): T {
@@ -83,8 +105,8 @@ export class UploadContext {
       absPath,
     })
     const req: UploadRequest = {
-      settings: this.settings,
       absPath,
+      uploaderCommandPath: this.uploaderCommandPath,
     }
     const url = await this.strategy.upload(req)
     log('UploadContext.upload done', {

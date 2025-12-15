@@ -25,6 +25,7 @@
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"tslib": "2.4.0",
-		"typescript": "5.9.3"
+		"typescript": "5.9.3",
+		"zustand": "^5.0.0"
 	}
 }
