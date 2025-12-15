@@ -82,12 +82,14 @@ export function getTargetDir(settings: ImageFlowPluginSettings, activeFile: any,
 
 export function getTargetBase(settings: ImageFlowPluginSettings, originalBase: string, t: Record<string, string>) {
   if (!settings.renameEnabled || settings.keepOriginal) {
-    log('getTargetBase keep original', { originalBase })
-    return originalBase
+    const sanitized = normalizeDir(originalBase)
+    log('getTargetBase keep original', { originalBase, sanitized })
+    return sanitized
   }
   const applied = applyPattern(settings.renamePattern, t)
-  const sanitized = applied.replace(/\/+/, '-')
-  log('getTargetBase renamed', { originalBase, pattern: settings.renamePattern, applied, sanitized })
+  const replaced = applied.replace(/\/+/, '-')
+  const sanitized = normalizeDir(replaced)
+  log('getTargetBase renamed', { originalBase, pattern: settings.renamePattern, applied, replaced, sanitized })
   return sanitized
 }
 

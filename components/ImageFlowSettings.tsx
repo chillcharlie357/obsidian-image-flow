@@ -53,6 +53,22 @@ export default function ImageFlowSettings(props: {
       )}
 
       <div className="setting-item-heading">
+        <div className="setting-item-name">Save Location</div>
+      </div>
+
+      <LocationSettings
+        value={{ saveLocationMode: local.saveLocationMode, customLocationPattern: local.customLocationPattern }}
+        ctx={props.ctx}
+        onChange={(v) =>
+          setLocal({
+            ...local,
+            saveLocationMode: v.saveLocationMode,
+            customLocationPattern: v.customLocationPattern,
+          })
+        }
+      />
+
+      <div className="setting-item-heading">
         <div className="setting-item-name">Image Syntax</div>
       </div>
 
@@ -78,26 +94,6 @@ export default function ImageFlowSettings(props: {
       </div>
 
       <ImageUploadSettings value={local} onChange={(v) => setLocal(v)} />
-
-      {!local.uploadEnabled && (
-        <>
-          <div className="setting-item-heading">
-            <div className="setting-item-name">Save Location</div>
-          </div>
-
-          <LocationSettings
-            value={{ saveLocationMode: local.saveLocationMode, customLocationPattern: local.customLocationPattern }}
-            ctx={props.ctx}
-            onChange={(v) =>
-              setLocal({
-                ...local,
-                saveLocationMode: v.saveLocationMode,
-                customLocationPattern: v.customLocationPattern,
-              })
-            }
-          />
-        </>
-      )}
     </div>
   )
 }

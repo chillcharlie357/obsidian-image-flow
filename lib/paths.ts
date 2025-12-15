@@ -23,7 +23,17 @@ export function relativePath(from: string, to: string) {
 
 export function normalizeDir(dir: string) {
   if (!dir) return ''
-  const normalized = dir.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
+  const parts = dir.split('/')
+  const sanitizedParts = parts
+    .map((part) =>
+      part
+        .trim()
+        .replace(/\s+/g, '')
+        .replace(/[<>:"\\|?*\u0000-\u001F]/g, '')
+    )
+    .filter((part) => part.length > 0)
+  const joined = sanitizedParts.join('/')
+  const normalized = joined.replace(/\/+/g, '/').replace(/^\/+/, '').replace(/\/+$/, '')
   log('normalizeDir', { input: dir, normalized })
   return normalized
 }
@@ -91,4 +101,3 @@ export async function moveRename(app: App, file: TFile, to: string) {
     new Notice(`Image Flow Error: Failed to move file to ${target}`)
   }
 }
-

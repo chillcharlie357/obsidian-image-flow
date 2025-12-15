@@ -2,8 +2,11 @@ import { log, logWarn, logError } from '../log'
 import type { UploadRequest } from './types'
 
 function httpInText(s: string) {
-  const m = s.match(/https?:\/\/\S+/g)
-  return m ? m[m.length - 1] : ''
+  const m = s.match(/https?:\/\/[^\s)]+/g)
+  if (!m || m.length === 0) return ''
+  let url = m[m.length - 1]
+  url = url.replace(/[)\]]+$/g, '')
+  return url
 }
 
 export async function uploadViaCliAndClipboard(req: UploadRequest, defaultCmd: string): Promise<string> {
