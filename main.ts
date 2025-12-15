@@ -24,6 +24,17 @@ const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
     uploaderType: 'none',
     uploaderCommandPath: '',
     deleteLocalAfterUpload: false,
+    uploaderConfigs: {
+        piclist: {
+            docUrl: 'https://piclist.cn/en/app.html',
+        },
+        picgo: {
+            docUrl: 'https://picgo.github.io/PicGo-Doc/en/guide/',
+        },
+        picgo_core: {
+            docUrl: 'https://github.com/PicGo/PicGo-Core',
+        },
+    },
 }
 
 	export default class ImageFlowPlugin extends Plugin {
@@ -64,11 +75,21 @@ const DEFAULT_SETTINGS: ImageFlowPluginSettings = {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        // load setting from data.json via obsidian api
+		const loaded = await this.loadData();
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		if (
+			!this.settings.uploaderConfigs ||
+			Object.keys(this.settings.uploaderConfigs).length === 0
+		) {
+			this.settings.uploaderConfigs =
+				DEFAULT_SETTINGS.uploaderConfigs || {};
+		}
         console.log('[Image Flow] loadSettings merged result', this.settings)
 	}
 
     async saveSettings() {
+        // save setting to data.json via obsidian api
         console.log('[Image Flow] saveSettings', this.settings)
         await this.saveData(this.settings);
     }

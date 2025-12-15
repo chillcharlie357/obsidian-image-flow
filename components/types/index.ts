@@ -23,6 +23,7 @@ export interface ImageFlowSettingsCore {
   deleteLocalAfterUpload: boolean
   uploaderProfiles?: ImageUploaderProfile[]
   activeUploaderProfileId?: string | null
+  uploaderConfigs?: Record<string, Record<string, unknown>>
 }
 
 export interface RenameSettingsValue {

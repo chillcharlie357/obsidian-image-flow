@@ -93,7 +93,7 @@ export default function ImageFlowSettings(props: {
         </div>
       </div>
 
-      <ImageUploadSettings value={local} onChange={(v) => setLocal(v)} />
+      <ImageUploadSettings settings={local} onChange={(v) => setLocal(v)} />
     </div>
   )
 }

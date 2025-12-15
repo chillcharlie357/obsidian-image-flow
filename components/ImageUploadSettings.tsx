@@ -1,14 +1,35 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { ImageFlowSettingsCore, ImageUploaderProfile } from "./types";
+import { UploadContext } from "../lib/upload";
 
 export default function ImageUploadSettings(props: {
-	value: ImageFlowSettingsCore;
+	settings: ImageFlowSettingsCore;
 	onChange: (v: ImageFlowSettingsCore) => void;
 }) {
-	const { value, onChange } = props;
-	const profiles: ImageUploaderProfile[] = value.uploaderProfiles || [];
+	const { settings, onChange } = props;
+	const profiles: ImageUploaderProfile[] = settings.uploaderProfiles || [];
 	const activeProfile =
-		profiles.find((p) => p.id === value.activeUploaderProfileId) || null;
+		profiles.find((p) => p.id === settings.activeUploaderProfileId) || null;
+
+	const ctx = useMemo(() => {
+		const initialType =
+			activeProfile?.uploaderType ||
+			(settings.uploaderType && settings.uploaderType !== "none"
+				? settings.uploaderType
+				: null);
+		const c = new UploadContext(settings as any, initialType as any);
+		c.updateWithProfile(activeProfile || undefined);
+		return c;
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		settings.uploadEnabled,
+		settings.uploaderType,
+		settings.uploaderConfigs,
+		settings.activeUploaderProfileId,
+		activeProfile?.uploaderType,
+	]);
+
+	const currentDocUrl = ctx.getConfig<string>("docUrl", undefined);
 
 	function set(
 		next: Partial<ImageFlowSettingsCore>,
@@ -21,23 +42,23 @@ export default function ImageUploadSettings(props: {
 			);
 			merged = { ...merged, uploaderProfiles: nextProfiles };
 		}
-		onChange({ ...value, ...merged });
+		onChange({ ...settings, ...merged });
 	}
 
 	useEffect(() => {
-		if (!value.uploadEnabled) return;
+		if (!settings.uploadEnabled) return;
 		if (profiles.length === 0) {
 			const id = "default";
 			const profile: ImageUploaderProfile = {
 				id,
 				name: "Default",
-				uploaderType: value.uploaderType,
-				uploaderCommandPath: value.uploaderCommandPath,
-				deleteLocalAfterUpload: value.deleteLocalAfterUpload,
+				uploaderType: settings.uploaderType,
+				uploaderCommandPath: settings.uploaderCommandPath,
+				deleteLocalAfterUpload: settings.deleteLocalAfterUpload,
 			};
 			set({ uploaderProfiles: [profile], activeUploaderProfileId: id });
 		}
-	}, [value.uploadEnabled]);
+	}, [settings.uploadEnabled]);
 
 	function addProfileFromCurrent() {
 		const nextProfiles = [...profiles];
@@ -45,9 +66,9 @@ export default function ImageUploadSettings(props: {
 		const profile: ImageUploaderProfile = {
 			id,
 			name: `Profile ${nextProfiles.length + 1}`,
-			uploaderType: value.uploaderType,
-			uploaderCommandPath: value.uploaderCommandPath,
-			deleteLocalAfterUpload: value.deleteLocalAfterUpload,
+			uploaderType: settings.uploaderType,
+			uploaderCommandPath: settings.uploaderCommandPath,
+			deleteLocalAfterUpload: settings.deleteLocalAfterUpload,
 		};
 		nextProfiles.push(profile);
 		set({
@@ -77,7 +98,7 @@ export default function ImageUploadSettings(props: {
 		const next: Partial<ImageFlowSettingsCore> = {
 			uploaderProfiles: nextProfiles,
 		};
-		if (value.activeUploaderProfileId === id) {
+		if (settings.activeUploaderProfileId === id) {
 			const first = nextProfiles[0];
 			next.activeUploaderProfileId = first ? first.id : null;
 			if (first) {
@@ -124,24 +145,24 @@ export default function ImageUploadSettings(props: {
 				<div className="setting-item-control">
 					<div
 						className={`checkbox-container ${
-							value.uploadEnabled ? "is-enabled" : ""
+							settings.uploadEnabled ? "is-enabled" : ""
 						}`}
 						role="checkbox"
-						aria-checked={value.uploadEnabled}
+						aria-checked={settings.uploadEnabled}
 						tabIndex={0}
 						onClick={() =>
-							set({ uploadEnabled: !value.uploadEnabled })
+							set({ uploadEnabled: !settings.uploadEnabled })
 						}
 						onKeyDown={(e) => {
 							if (e.key === "Enter" || e.key === " ") {
 								e.preventDefault();
-								set({ uploadEnabled: !value.uploadEnabled });
+								set({ uploadEnabled: !settings.uploadEnabled });
 							}
 						}}
 					>
 						<input
 							type="checkbox"
-							checked={value.uploadEnabled}
+							checked={settings.uploadEnabled}
 							tabIndex={-1}
 							readOnly
 						/>
@@ -149,7 +170,7 @@ export default function ImageUploadSettings(props: {
 				</div>
 			</div>
 
-			{value.uploadEnabled && (
+			{settings.uploadEnabled && (
 				<div>
 					<div className="setting-item">
 						<div className="setting-item-info">
@@ -168,7 +189,7 @@ export default function ImageUploadSettings(props: {
 								<div>
 									<select
 										value={
-											value.activeUploaderProfileId || ""
+											settings.activeUploaderProfileId || ""
 										}
 										onChange={(e) => {
 											const id = e.target.value;
@@ -236,13 +257,25 @@ export default function ImageUploadSettings(props: {
 						<div className="setting-item-info">
 							<div className="setting-item-name">Uploader</div>
 							<div className="setting-item-description">
-								Choose which uploader to use. PicList is
-								supported now; PicGo/PicGo-Core are TODO.
+								Choose which uploader to use. Image upload
+								supports PicList, PicGo, and PicGo-Core.
 							</div>
+							{currentDocUrl && (
+								<div className="setting-item-description">
+									Docs:{" "}
+									<a
+										href={currentDocUrl}
+										target="_blank"
+										rel="noreferrer"
+									>
+										{currentDocUrl}
+									</a>
+								</div>
+							)}
 						</div>
 						<div className="setting-item-control">
 							<select
-								value={value.uploaderType}
+								value={settings.uploaderType}
 								onChange={(e) => {
 									const nextType = e.target.value as any;
 									set(
@@ -277,7 +310,7 @@ export default function ImageUploadSettings(props: {
 						<div className="setting-item-control">
 							<input
 								type="text"
-								value={value.uploaderCommandPath}
+								value={settings.uploaderCommandPath}
 								onChange={(e) => {
 									const nextPath = e.target.value;
 									set(
@@ -286,9 +319,9 @@ export default function ImageUploadSettings(props: {
 									);
 								}}
 								placeholder={
-									value.uploaderType === "picgo_core"
+									settings.uploaderType === "picgo_core"
 										? "picgo-core"
-										: value.uploaderType === "piclist"
+										: settings.uploaderType === "piclist"
 										? "piclist"
 										: "picgo"
 								}
@@ -309,15 +342,15 @@ export default function ImageUploadSettings(props: {
 						<div className="setting-item-control">
 							<div
 								className={`checkbox-container ${
-									value.deleteLocalAfterUpload
+									settings.deleteLocalAfterUpload
 										? "is-enabled"
 										: ""
 								}`}
 								role="checkbox"
-								aria-checked={value.deleteLocalAfterUpload}
+								aria-checked={settings.deleteLocalAfterUpload}
 								tabIndex={0}
 								onClick={() => {
-									const next = !value.deleteLocalAfterUpload;
+									const next = !settings.deleteLocalAfterUpload;
 									set(
 										{ deleteLocalAfterUpload: next },
 										{ deleteLocalAfterUpload: next }
@@ -327,7 +360,7 @@ export default function ImageUploadSettings(props: {
 									if (e.key === "Enter" || e.key === " ") {
 										e.preventDefault();
 										const next =
-											!value.deleteLocalAfterUpload;
+											!settings.deleteLocalAfterUpload;
 										set(
 											{ deleteLocalAfterUpload: next },
 											{ deleteLocalAfterUpload: next }
@@ -337,7 +370,7 @@ export default function ImageUploadSettings(props: {
 							>
 								<input
 									type="checkbox"
-									checked={value.deleteLocalAfterUpload}
+									checked={settings.deleteLocalAfterUpload}
 									tabIndex={-1}
 									readOnly
 								/>

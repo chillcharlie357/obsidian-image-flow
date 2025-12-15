@@ -7,5 +7,6 @@ export interface UploadRequest {
 
 export interface ImageUploaderStrategy {
   type: string
+  config: Record<string, unknown>
   upload(req: UploadRequest): Promise<string>
 }
