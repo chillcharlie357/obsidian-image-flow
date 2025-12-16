@@ -26,9 +26,6 @@ const DEFAULT_SETTINGS: ImageFlowSettingsCore = {
         picgo: {
             docUrl: 'https://picgo.github.io/PicGo-Doc/en/guide/',
         },
-        picgo_core: {
-            docUrl: 'https://github.com/PicGo/PicGo-Core',
-        },
     },
 }
 

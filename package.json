@@ -1,6 +1,6 @@
 {
 	"name": "image-flow",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"description": "A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.",
 	"main": "main.js",
 	"scripts": {

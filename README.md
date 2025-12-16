@@ -101,7 +101,7 @@ Language: English | [中文文档](https://github.com/chillcharlie357/obsidian-i
 
 A plugin that streamlines how images are pasted, stored, and uploaded in Obsidian.
 
-It listens to paste and drag‑and‑drop events in the editor, saves image files to your vault following configurable rules, and optionally uploads them via external CLI tools such as PicList, PicGo, or PicGo-Core.
+It listens to paste and drag‑and‑drop events in the editor, saves image files to your vault following configurable rules, and optionally uploads them via external CLI tools such as PicList.
 
 ## Features
 
@@ -125,9 +125,9 @@ It listens to paste and drag‑and‑drop events in the editor, saves image file
     - `Current Folder Assets`: save to `{file_path}/assets/`
     - `Custom`: arbitrary directory pattern with placeholders such as `{vault}`, `{date}`, `{filename}`, `{file_path}`.
 
-- Image upload (PicList / PicGo / PicGo-Core)
+- Image upload (PicList / PicGo)
   - Optional upload flow that runs after the image is saved locally.
-  - Built‑in strategies for `piclist`, `picgo`, and `picgo_core`.
+  - Built‑in strategy for `piclist`, `picgo`.
   - Image upload supports PicList as an uploader option: https://github.com/Kuingsmile/PicList.
   - Configurable command: use a bare command name or an absolute path.
   - Upload flow:

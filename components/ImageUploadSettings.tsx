@@ -117,8 +117,7 @@ export default function ImageUploadSettings() {
 				<div className="setting-item-info">
 					<div className="setting-item-name">Enable image upload</div>
 					<div className="setting-item-description">
-						Upload pasted images through external tools. Currently
-						PicList is supported; PicGo/PicGo-Core are TODO.
+						Upload pasted images through external tools.
 					</div>
 				</div>
 				<div className="setting-item-control">
@@ -236,8 +235,7 @@ export default function ImageUploadSettings() {
 						<div className="setting-item-info">
 							<div className="setting-item-name">Uploader</div>
 							<div className="setting-item-description">
-								Choose which uploader to use. Image upload
-								supports PicList, PicGo, and PicGo-Core.
+								Choose which uploader to use.
 							</div>
 							{currentDocUrl && (
 								<div className="setting-item-description">
@@ -269,8 +267,9 @@ export default function ImageUploadSettings() {
 							>
 								<option value="none">None</option>
 								<option value="piclist">PicList</option>
-								<option value="picgo">PicGo</option>
-								<option value="picgo_core">PicGo-Core</option>
+								<option value="picgo" >
+									PicGo
+								</option>
 							</select>
 						</div>
 					</div>
@@ -281,9 +280,9 @@ export default function ImageUploadSettings() {
 								Uploader path
 							</div>
 							<div className="setting-item-description">
-								Executable path for the selected uploader. For
-								example <code>picgo</code>,{" "}
-								<code>picgo-core</code>, <code>piclist</code>.
+								Executable path for the selected uploader. Must
+								be a full path such as{" "}
+								<code>D:\piclist\PicList.exe</code>.
 							</div>
 						</div>
 						<div className="setting-item-control">
@@ -297,13 +296,7 @@ export default function ImageUploadSettings() {
 										{ uploaderCommandPath: nextPath }
 									);
 								}}
-								placeholder={
-									settings.uploaderType === "picgo_core"
-										? "picgo-core"
-										: settings.uploaderType === "piclist"
-										? "piclist"
-										: "picgo"
-								}
+								placeholder="<Path to uploader>"
 							/>
 						</div>
 					</div>

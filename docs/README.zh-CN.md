@@ -2,7 +2,7 @@
 
 一个用于优化 Obsidian 图片粘贴、保存和上传流程的插件。
 
-插件会监听编辑器中的粘贴和拖拽事件，按规则保存图片文件，并在需要时通过 PicList / PicGo / PicGo-Core 等外部 CLI 工具上传到图床，最后在文档中插入合适的图片链接。
+插件会监听编辑器中的粘贴和拖拽事件，按规则保存图片文件，并在需要时通过 PicList 等外部 CLI 工具上传到图床，最后在文档中插入合适的图片链接。
 
 ## 功能特性
 
@@ -29,14 +29,14 @@
     - `{vault}`、`{date}`、`{filename}`、`{file_path}`
   - 设置界面中提供“预览路径”，可以看到最终落盘目录。
 
-- 图片上传（PicList / PicGo / PicGo-Core）
+- 图片上传（当前仅支持 PicList/ PicGo）
   - 可在设置中开启“图片上传”，在本地保存之后调用外部 CLI 完成上传。
-  - 内置三种上传策略：
-    - `piclist`、`picgo`、`picgo_core`
+  - 内置上传策略：
+    - `piclist`
+    - `picgo`
   - 图片上传支持使用 PicList，项目地址：https://github.com/Kuingsmile/PicList。
-  - 上传命令可配置：
-    - 只写命令名（如 `picgo`、`picgo-core`、`piclist`），依赖系统 `PATH`。
-    - 或填写完整绝对路径。
+- 上传命令路径：
+-  - 必须填写完整可执行文件路径，如 `D:\piclist\PicList.exe`。
   - 上传流程：
     - 执行 CLI 命令。
     - 从标准输出 / 错误输出或剪贴板中提取图片 URL。
@@ -81,7 +81,7 @@
 - 使用“重命名规则”生成文件名（或保留原始文件名）。
 - 将图片写入 vault。
 - 如果启用了上传：
-  - 调用配置好的 PicList / PicGo / PicGo-Core 命令上传图片。
+-  - 调用配置好的 PicList / PicGo 命令上传图片。
   - 从输出 / 剪贴板中解析出远程图片 URL。
   - 将插入到文档中的图片链接替换为远程 URL。
 - 根据“图片语法”设置，最终插入 Markdown 或 wikilink 格式。
@@ -106,7 +106,7 @@
   - 管理上传 Profile：
     - 选择、重命名、复制、删除 Profile。
   - 为每个 Profile 配置：
-    - 上传类型（`none` / `piclist` / `picgo` / `picgo_core`）
+    - 上传类型（`none` / `piclist` / `picgo`）
     - 上传命令路径
     - 是否上传后删除本地图片。
 

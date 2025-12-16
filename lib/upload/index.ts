@@ -1,7 +1,6 @@
 import type { ImageUploaderStrategy, UploadRequest } from './types'
 import { PicListUploader } from './piclist'
 import { PicGoUploader } from './picgo'
-import { PicGoCoreUploader } from './picgoCore'
 import { log, logWarn } from '../log'
 
 export * from './types'
@@ -23,7 +22,6 @@ function createUploaderStrategy(type: string | undefined | null): ImageUploaderS
   if (!type || type === 'none') return null
   if (type === 'piclist') return new PicListUploader()
   if (type === 'picgo') return new PicGoUploader()
-  if (type === 'picgo_core') return new PicGoCoreUploader()
   logWarn('Unknown uploader type, no strategy created', type)
   return null
 }

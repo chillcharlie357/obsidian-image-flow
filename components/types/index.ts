@@ -1,6 +1,6 @@
 export type SaveLocationMode = 'vault_assets' | 'filename_assets' | 'filepath_assets' | 'custom'
 export type ImageSyntaxMode = 'markdown' | 'wikilink'
-export type ImageUploaderType = 'none' | 'picgo' | 'picgo_core' | 'piclist'
+export type ImageUploaderType = 'none'  | 'piclist' | 'picgo'
 
 export interface ImageUploaderProfile {
   id: string
