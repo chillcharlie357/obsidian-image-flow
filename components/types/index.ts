@@ -12,7 +12,6 @@ export interface ImageUploaderProfile {
 
 export interface ImageFlowSettingsCore {
   renameEnabled: boolean
-  keepOriginal: boolean
   renamePattern: string
   saveLocationMode: SaveLocationMode
   customLocationPattern: string
@@ -28,7 +27,6 @@ export interface ImageFlowSettingsCore {
 
 export interface RenameSettingsValue {
   renamePattern: string
-  keepOriginal: boolean
 }
 
 export interface LocationSettingsValue {

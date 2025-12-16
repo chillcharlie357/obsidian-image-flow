@@ -3,21 +3,17 @@ import type { RenameSettingsValue } from './types'
 
 export default function RenameSettings() {
   const DEFAULT_RENAME_PATTERN = '{date}-{time}-{random}'
-  const keepOriginal = useSettingsStore((s) => s.settings.keepOriginal)
   const renamePattern = useSettingsStore((s) => s.settings.renamePattern)
-  const setKeepOriginal = useSettingsStore((s) => s.setKeepOriginal)
   const setRenamePattern = useSettingsStore((s) => s.setRenamePattern)
 
   function sampleName() {
     return generateName('image.png', {
-      keepOriginal,
       renamePattern,
     })
   }
   function generateName(original: string, v: RenameSettingsValue) {
     const base = original.replace(/\.[^/.]+$/, '')
     const ext = original.split('.').pop() || 'png'
-    if (v.keepOriginal) return `${base}.${ext}`
     const now = new Date()
     const pad = (n: number) => n.toString().padStart(2, '0')
     const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
@@ -54,30 +50,6 @@ export default function RenameSettings() {
     <>
       <div className="setting-item">
         <div className="setting-item-info">
-          <div className="setting-item-name">Keep original filename</div>
-          <div className="setting-item-description">Use the original filename instead of generating a new one</div>
-        </div>
-        <div className="setting-item-control">
-          <div
-            className={`checkbox-container ${keepOriginal ? 'is-enabled' : ''}`}
-            role="checkbox"
-            aria-checked={keepOriginal}
-            tabIndex={0}
-            onClick={() => setKeepOriginal(!keepOriginal)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                setKeepOriginal(!keepOriginal)
-              }
-            }}
-          >
-            <input type="checkbox" checked={keepOriginal} tabIndex={-1} readOnly />
-          </div>
-        </div>
-      </div>
-
-      <div className="setting-item">
-        <div className="setting-item-info">
           <div className="setting-item-name">
             Rename Pattern
           </div>
@@ -96,7 +68,6 @@ export default function RenameSettings() {
             type="text"
             value={renamePattern}
             onChange={(e) => setRenamePattern(e.target.value)}
-            disabled={keepOriginal}
             placeholder={DEFAULT_RENAME_PATTERN}
           />
           <button
@@ -104,7 +75,7 @@ export default function RenameSettings() {
             className="clickable-icon"
             title="reset"
             aria-label="reset"
-            disabled={keepOriginal || renamePattern === DEFAULT_RENAME_PATTERN}
+            disabled={renamePattern === DEFAULT_RENAME_PATTERN}
             onClick={() => setRenamePattern(DEFAULT_RENAME_PATTERN)}
           >
             ↺

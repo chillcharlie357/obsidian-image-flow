@@ -94,12 +94,11 @@ export function getTargetDir(
 
 export function getTargetBase(
   renameEnabled: boolean,
-  keepOriginal: boolean,
   renamePattern: string,
   originalBase: string,
   t: Record<string, string>,
 ) {
-  if (!renameEnabled || keepOriginal) {
+  if (!renameEnabled) {
     const sanitized = normalizeDir(originalBase)
     log('getTargetBase keep original', { originalBase, sanitized })
     return sanitized

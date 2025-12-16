@@ -11,7 +11,6 @@ import { handlePaste } from './lib/handlePaste'
 
 const DEFAULT_SETTINGS: ImageFlowSettingsCore = {
     renameEnabled: true,
-    keepOriginal: false,
     renamePattern: '{date}-{time}-{random}',
     saveLocationMode: 'vault_assets',
     customLocationPattern: '{vault}/assets/{date}/',
@@ -71,16 +70,16 @@ export default class ImageFlowPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-        // load setting from data.json via obsidian api
 		const loaded = await this.loadData();
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		const merged: any = Object.assign({}, DEFAULT_SETTINGS, loaded);
 		if (
-			!this.settings.uploaderConfigs ||
-			Object.keys(this.settings.uploaderConfigs).length === 0
+			!merged.uploaderConfigs ||
+			Object.keys(merged.uploaderConfigs).length === 0
 		) {
-			this.settings.uploaderConfigs =
+			merged.uploaderConfigs =
 				DEFAULT_SETTINGS.uploaderConfigs || {};
 		}
+		this.settings = merged;
         console.log('[Image Flow] loadSettings merged result', this.settings)
 	}
 

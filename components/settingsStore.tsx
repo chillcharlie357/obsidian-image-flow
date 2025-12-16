@@ -3,7 +3,6 @@ import type { ImageFlowSettingsCore } from './types'
 
 const DEFAULT_CORE_SETTINGS: ImageFlowSettingsCore = {
   renameEnabled: true,
-  keepOriginal: false,
   renamePattern: '{date}-{time}-{random}',
   saveLocationMode: 'vault_assets',
   customLocationPattern: '{vault}/assets/{date}/',
@@ -25,7 +24,6 @@ interface SettingsStoreState {
   init: (initial: ImageFlowSettingsCore, onChange?: (v: ImageFlowSettingsCore) => void) => void
   setRenameEnabled: (v: boolean) => void
   setRenamePattern: (v: string) => void
-  setKeepOriginal: (v: boolean) => void
   setSaveLocationMode: (v: ImageFlowSettingsCore['saveLocationMode']) => void
   setCustomLocationPattern: (v: string) => void
   setImageSyntaxMode: (v: ImageFlowSettingsCore['imageSyntaxMode']) => void
@@ -79,13 +77,6 @@ export const useSettingsStore = create<SettingsStoreState>((set, get) => ({
   },
   setRenamePattern: (v: string) => {
     set((state) => ({ settings: { ...state.settings, renamePattern: v } }))
-    const cb = get().onChange
-    if (cb) {
-      cb({ ...get().settings })
-    }
-  },
-  setKeepOriginal: (v: boolean) => {
-    set((state) => ({ settings: { ...state.settings, keepOriginal: v } }))
     const cb = get().onChange
     if (cb) {
       cb({ ...get().settings })

@@ -17,7 +17,6 @@ export async function handlePaste(
       saveLocationMode,
       customLocationPattern,
       renameEnabled,
-      keepOriginal,
       renamePattern,
       uploadEnabled,
       uploaderType,
@@ -56,7 +55,7 @@ export async function handlePaste(
       const dir = getTargetDir(saveLocationMode, customLocationPattern, activeFile, null, base)
       await ensureFolder(app, dir)
 
-      const newBase = getTargetBase(renameEnabled, keepOriginal, renamePattern, base, t)
+      const newBase = getTargetBase(renameEnabled, renamePattern, base, t)
       const dest = await uniquePath(app, dir, newBase, ext)
 
       const buffer = await file.arrayBuffer()
